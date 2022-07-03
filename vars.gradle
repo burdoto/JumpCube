@@ -5,8 +5,8 @@ ext {
     pluginDescription = 'Jump N Run Minigame'
 
     snapshot = project.version.endsWith('SNAPSHOT')
-    mcVersion = '1.16.4'
-    mcVersionMj = mcVersion.substring(0, mcVersion.lastIndexOf('.'))
+    mcVersion = '1.19'
+    mcVersionMj = mcVersion.split('\\.').length == 3 ? mcVersion.substring(0, mcVersion.lastIndexOf('.')) : mcVersion
     spigotRC = 'R0.1'
     pluginVersion = version.replace("-SNAPSHOT", "-alpha")
 
