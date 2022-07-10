@@ -65,8 +65,21 @@ public class ExistingCube implements Cube, Generatable, Startable, Initializable
     }
 
     @Override
+    public int getGalleryHeight() {
+        int galleryHeight = JumpCube.instance.getConfig().getInt("cubes."+getCubeName()+".gallery.height", -1);
+        return galleryHeight == -1 ? JumpCube.instance.getConfig().getInt("cube.defaults.gallery.height") : galleryHeight;
+    }
+
+    @Override
     public int getHeight() {
-        return JumpCube.instance.getConfig().getInt("cube.defaults.height");
+        int height = JumpCube.instance.getConfig().getInt("cubes."+getCubeName()+".height", -1);
+        return height == -1 ? JumpCube.instance.getConfig().getInt("cube.defaults.height") : height;
+    }
+
+    @Override
+    public int getBottom() {
+        int bottom = JumpCube.instance.getConfig().getInt("cubes."+getCubeName()+".bottom", -1);
+        return bottom == -1 ? JumpCube.instance.getConfig().getInt("cube.defaults.bottom") : bottom;
     }
 
     @Override
@@ -184,9 +197,9 @@ public class ExistingCube implements Cube, Generatable, Startable, Initializable
         final boolean smallX = pos[0][0] < pos[1][0];
         final boolean smallZ = pos[0][2] < pos[1][2];
 
-        final int galleryHeight = JumpCube.instance.getConfig().getInt("cube.defaults.gallery.height");
-        final int height = JumpCube.instance.getConfig().getInt("cube.defaults.height");
-        final int bottom = JumpCube.instance.getConfig().getInt("cube.defaults.bottom");
+        final int height = getHeight();
+        final int bottom = getBottom();
+        final int galleryHeight = getGalleryHeight();
 
         int x, y, z;
 
@@ -238,9 +251,9 @@ public class ExistingCube implements Cube, Generatable, Startable, Initializable
         final boolean smallZ = pos[0][2] < pos[1][2];
 
         int x, y, z;
-        final int galleryHeight = JumpCube.instance.getConfig().getInt("cube.defaults.gallery.height");
-        final int height = JumpCube.instance.getConfig().getInt("cube.defaults.height");
-        final int bottom = JumpCube.instance.getConfig().getInt("cube.defaults.bottom");
+        final int height = getHeight();
+        final int bottom = getBottom();
+        final int galleryHeight = getGalleryHeight();
 
         IntStream.range(2, mid(spaceX, spaceZ))
                 .forEach(off -> {
@@ -288,7 +301,7 @@ public class ExistingCube implements Cube, Generatable, Startable, Initializable
         final int zDistA = dist(midZ, minZ);
         final int zDistB = dist(midZ, maxZ);
 
-        final int galleryHeight = JumpCube.instance.getConfig().getInt("cube.defaults.gallery.height");
+        final int galleryHeight = getGalleryHeight();
 
         System.out.println("spaceZ = " + spaceZ);
 
@@ -302,7 +315,8 @@ public class ExistingCube implements Cube, Generatable, Startable, Initializable
     }
 
     private void generateGallery(int space, int mid, int distA, int distB) {
-        final int galleryHeight = JumpCube.instance.getConfig().getInt("cube.defaults.gallery.height");
+        final int galleryHeight = getGalleryHeight();
+
         int otherX = (mid - Integer.compare(distA, distB));
         (otherX > mid ? IntStream.range(mid, otherX)
                 : (otherX == mid ? IntStream.range(otherX, mid + 1)
@@ -318,7 +332,7 @@ public class ExistingCube implements Cube, Generatable, Startable, Initializable
     public void init() {
         manager.init();
 
-        final int galleryHeight = JumpCube.instance.getConfig().getInt("cube.defaults.gallery.height");
+        final int galleryHeight = getGalleryHeight();
 
         this.tpPos = new int[][]{
                 new int[]{minX + 1, galleryHeight + 1, minZ + 1},

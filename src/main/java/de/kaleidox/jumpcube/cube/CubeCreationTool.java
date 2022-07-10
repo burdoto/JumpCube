@@ -41,8 +41,18 @@ public class CubeCreationTool implements Cube {
     }
 
     @Override
+    public int getGalleryHeight() {
+        return -1;
+    }
+
+    @Override
     public int getHeight() {
-        return max(pos[0][1], pos[1][1]);
+        return -1;
+    }
+
+    @Override
+    public int getBottom() {
+        return -1;
     }
 
     @Override
@@ -85,6 +95,9 @@ public class CubeCreationTool implements Cube {
 
         // save world
         config.set(basePath + "world", world.getName());
+        config.set(basePath + "height", getHeight());
+        config.set(basePath + "bottom", getBottom());
+        config.set(basePath + "gallery.height", getGalleryHeight());
 
         // save first position
         config.set(basePath + "pos1.x", pos[0][0]);
