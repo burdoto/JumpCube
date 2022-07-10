@@ -1,5 +1,5 @@
 ext {
-    artifactName = 'Spiroid'
+    artifactName = 'JumpCube'
     userbase = 'comroid-git'
 
     pluginDescription = 'Jump N Run Minigame'
