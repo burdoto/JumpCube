@@ -159,8 +159,12 @@ public final class JumpCube extends JavaPlugin {
             config.set("cube.defaults.bar.cFix", "blue_concrete");
         if (!config.isSet("cube.defaults.bar.dFix"))
             config.set("cube.defaults.bar.dFix", "light_gray_concrete");
+        if (!config.isSet("cube.defaults.bottom"))
+            config.set("cube.defaults.bottom", -60);
         if (!config.isSet("cube.defaults.height"))
             config.set("cube.defaults.height", 120);
+        if (!config.isSet("cube.defaults.gallery.height"))
+            config.set("cube.defaults.gallery.height", -20);
 
         saveConfig();
 

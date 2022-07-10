@@ -44,8 +44,10 @@ public class ExistingCube implements Cube, Generatable, Startable, Initializable
     private final int[][] pos;
     private final int minX, maxX, minZ, maxZ;
     private final BlockBar bar;
+    @Deprecated
     private final int galleryHeight = 19;
     private final double density = 0.183; // todo Add changeable density
+    @Deprecated
     private final int height = 110; // todo Add changeable height
     private final double spacing = 0.22;
     private int[][] tpPos;
@@ -64,7 +66,7 @@ public class ExistingCube implements Cube, Generatable, Startable, Initializable
 
     @Override
     public int getHeight() {
-        return height;
+        return JumpCube.instance.getConfig().getInt("cube.defaults.height");
     }
 
     @Override
@@ -182,11 +184,15 @@ public class ExistingCube implements Cube, Generatable, Startable, Initializable
         final boolean smallX = pos[0][0] < pos[1][0];
         final boolean smallZ = pos[0][2] < pos[1][2];
 
+        final int galleryHeight = JumpCube.instance.getConfig().getInt("cube.defaults.gallery.height");
+        final int height = JumpCube.instance.getConfig().getInt("cube.defaults.height");
+        final int bottom = JumpCube.instance.getConfig().getInt("cube.defaults.bottom");
+
         int x, y, z;
 
         for (x = minX + 1; x < maxX; x++)
             for (z = minZ + 1; z < maxZ; z++)
-                for (y = 255; y > 0; y--)
+                for (y = height; y > bottom; y--)
                     world.getBlockAt(x, y, z).setType(AIR);
 
         for (int off : new int[]{0, 1, 2}) {
@@ -199,9 +205,9 @@ public class ExistingCube implements Cube, Generatable, Startable, Initializable
                 for (z = minZloop; z <= maxZloop; z++) {
                     if (x == minXloop || x == maxXloop || z == minZloop || z == maxZloop) {
                         if (off == 0)
-                            for (y = maxY; y > 0; y--) {
+                            for (y = maxY; y > bottom; y--) {
                                 Block block = world.getBlockAt(x, y, z);
-                                if (block.getType() != AIR)
+                                if (y < 50 || block.getType() != AIR)
                                     block.setType(bar.getRandomMaterial(WALLS));
                             }
                         else {
@@ -212,9 +218,9 @@ public class ExistingCube implements Cube, Generatable, Startable, Initializable
                     }
 
                     if (off == 1) {
-                        world.getBlockAt(x, 1, z).setType(LAVA);
-                        world.getBlockAt(x, 2, z).setType(LAVA);
-                        world.getBlockAt(x, 3, z).setType(LAVA);
+                        world.getBlockAt(x, bottom + 1, z).setType(LAVA);
+                        world.getBlockAt(x, bottom + 2, z).setType(LAVA);
+                        world.getBlockAt(x, bottom + 3, z).setType(LAVA);
                     }
                 }
         }
@@ -232,6 +238,9 @@ public class ExistingCube implements Cube, Generatable, Startable, Initializable
         final boolean smallZ = pos[0][2] < pos[1][2];
 
         int x, y, z;
+        final int galleryHeight = JumpCube.instance.getConfig().getInt("cube.defaults.gallery.height");
+        final int height = JumpCube.instance.getConfig().getInt("cube.defaults.height");
+        final int bottom = JumpCube.instance.getConfig().getInt("cube.defaults.bottom");
 
         IntStream.range(2, mid(spaceX, spaceZ))
                 .forEach(off -> {
@@ -253,7 +262,7 @@ public class ExistingCube implements Cube, Generatable, Startable, Initializable
 
         for (x = minX + spaceX; x <= maxX - spaceX; x++)
             for (z = minZ + spaceZ; z <= maxZ - spaceZ; z++)
-                for (y = 10; y < height; y++)
+                for (y = bottom + 10; y < height; y++)
                     if (JumpCube.rng.nextDouble() % 1 > density) world.getBlockAt(x, y, z).setType(AIR);
                     else world.getBlockAt(x, y, z).setType(bar.getRandomMaterial(CUBE));
 
@@ -279,6 +288,8 @@ public class ExistingCube implements Cube, Generatable, Startable, Initializable
         final int zDistA = dist(midZ, minZ);
         final int zDistB = dist(midZ, maxZ);
 
+        final int galleryHeight = JumpCube.instance.getConfig().getInt("cube.defaults.gallery.height");
+
         System.out.println("spaceZ = " + spaceZ);
 
         generateGallery(spaceZ, midX, xDistA, xDistB);
@@ -291,6 +302,7 @@ public class ExistingCube implements Cube, Generatable, Startable, Initializable
     }
 
     private void generateGallery(int space, int mid, int distA, int distB) {
+        final int galleryHeight = JumpCube.instance.getConfig().getInt("cube.defaults.gallery.height");
         int otherX = (mid - Integer.compare(distA, distB));
         (otherX > mid ? IntStream.range(mid, otherX)
                 : (otherX == mid ? IntStream.range(otherX, mid + 1)
@@ -305,6 +317,8 @@ public class ExistingCube implements Cube, Generatable, Startable, Initializable
     @Override
     public void init() {
         manager.init();
+
+        final int galleryHeight = JumpCube.instance.getConfig().getInt("cube.defaults.gallery.height");
 
         this.tpPos = new int[][]{
                 new int[]{minX + 1, galleryHeight + 1, minZ + 1},
