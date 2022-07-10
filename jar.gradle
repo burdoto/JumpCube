@@ -25,6 +25,7 @@ compileJava {
 }
 
 processResources {
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
     from(sourceSets.main.resources) {
         expand project.properties
     }

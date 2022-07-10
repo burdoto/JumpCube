@@ -1,6 +1,7 @@
 package de.kaleidox.jumpcube;
 
 import de.kaleidox.jumpcube.chat.MessageLevel;
+import de.kaleidox.jumpcube.cmd.JumpCubeCommand;
 import de.kaleidox.jumpcube.cube.BlockBar;
 import de.kaleidox.jumpcube.cube.Cube;
 import de.kaleidox.jumpcube.cube.CubeCreationTool;
@@ -9,14 +10,13 @@ import de.kaleidox.jumpcube.exception.InnerCommandException;
 import de.kaleidox.jumpcube.exception.InvalidArgumentCountException;
 import de.kaleidox.jumpcube.exception.NoSuchCubeException;
 import de.kaleidox.jumpcube.util.BukkitUtil;
+import org.comroid.cmdr.spigot.SpigotCmdr;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
@@ -25,7 +25,7 @@ import static de.kaleidox.jumpcube.chat.Chat.message;
 import static de.kaleidox.jumpcube.chat.MessageLevel.ERROR;
 import static de.kaleidox.jumpcube.chat.MessageLevel.INFO;
 
-public final class JumpCube extends JavaPlugin {
+public final class JumpCube extends SpigotCmdr {
     public static final Random rng = new Random();
     @Nullable
     public static JumpCube instance;
@@ -45,8 +45,7 @@ public final class JumpCube extends JavaPlugin {
         return true;
     }
 
-    @Override
-    public boolean onCommand(@NotNull CommandSender sender,
+    public boolean _onCommand(@NotNull CommandSender sender,
                              @NotNull Command command,
                              @NotNull String label,
                              @NotNull String[] args) {
@@ -58,10 +57,10 @@ public final class JumpCube extends JavaPlugin {
                 case "jc":
                     if (!checkPerm(sender, Permission.USER)) return true;
                     if (args.length == 0) {
-                        message(sender, INFO, "JumpCube version %s", getDescription().getVersion());
+                        //message(sender, );
                         return true;
                     } else if (args.length == 1 && args[0].equalsIgnoreCase("reload")) {
-                        message(sender, ERROR, "Reloading not yet implemented");
+                        //message(sender, );
                         return true;
                     } else {
                         subCommand(sender, args[0], Arrays.copyOfRange(args, 1, args.length));
@@ -78,8 +77,7 @@ public final class JumpCube extends JavaPlugin {
     }
 
     @SuppressWarnings("SwitchStatementWithTooFewBranches")
-    @Override
-    public List<String> onTabComplete(
+    public List<String> _onTabComplete(
             @NotNull CommandSender sender,
             @NotNull Command command,
             @NotNull String alias,
@@ -138,6 +136,8 @@ public final class JumpCube extends JavaPlugin {
         super.onLoad();
 
         this.logger = getLogger();
+
+        registerCommand(JumpCubeCommand.class);
 
         saveConfig();
         saveDefaultConfig();
@@ -225,24 +225,6 @@ public final class JumpCube extends JavaPlugin {
 
         switch (subCommand.toLowerCase()) {
             case "create":
-                if (!checkPerm(sender, Permission.ADMIN)) return;
-                if (args.length != 1) throw new InvalidArgumentCountException(1, args.length);
-
-                if (ExistingCube.exists(args[0])) {
-                    message(sender, ERROR, "A cube with the name %s already exists!", args[0]);
-                    return;
-                }
-
-                if (sel instanceof CubeCreationTool && !((CubeCreationTool) sel).isReady()) {
-                    // delete old, nonready selection first
-                    sel.delete();
-                    selections.remove(senderUuid);
-                }
-
-                CubeCreationTool creationTool = new CubeCreationTool(BukkitUtil.getPlayer(sender));
-                creationTool.setName(args[0]);
-                selections.put(senderUuid, creationTool);
-                message(sender, INFO, "Cube %s creation started!", args[0]);
                 return;
             case "sel":
             case "select":

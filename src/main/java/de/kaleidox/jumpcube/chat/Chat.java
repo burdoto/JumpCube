@@ -15,24 +15,25 @@ public final class Chat {
     }
 
     public static void message(Player player, MessageLevel msgLevel, String format, Object... vars) {
-        player.sendMessage(prefix() + msgLevel.chatColor
-                + String.format(format, (Object[]) formatStrings(msgLevel, vars)));
+        player.sendMessage(prefix() + makeMessage(msgLevel, format, vars));
     }
 
     public static void broadcast(MessageLevel msgLevel, String format, Object... vars) {
-        Bukkit.broadcastMessage(prefix() + msgLevel.chatColor
-                + String.format(format, (Object[]) formatStrings(msgLevel, vars)));
+        Bukkit.broadcastMessage(prefix() + makeMessage(msgLevel, format, vars));
     }
 
     public static void broadcast(String permission, MessageLevel msgLevel, String format, Object... vars) {
-        Bukkit.broadcast(prefix() + msgLevel.chatColor
-                + String.format(format, (Object[]) formatStrings(msgLevel, vars)), permission);
+        Bukkit.broadcast(prefix() + makeMessage(msgLevel, format, vars), permission);
     }
 
     private static String prefix() {
         return ChatColor.DARK_GRAY + "[" +
                 ChatColor.BLUE + "JumpCube" +
                 ChatColor.DARK_GRAY + "] ";
+    }
+
+    public static String makeMessage(MessageLevel msgLevel, String format, Object... vars) {
+        return msgLevel.chatColor + String.format(format, (Object[]) formatStrings(msgLevel, vars));
     }
 
     private static String[] formatStrings(MessageLevel msgLevel, Object[] vars) {
