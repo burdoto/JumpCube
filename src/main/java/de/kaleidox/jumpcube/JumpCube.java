@@ -16,6 +16,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
@@ -57,7 +58,7 @@ public final class JumpCube extends JavaPlugin {
                 case "jc":
                     if (!checkPerm(sender, Permission.USER)) return true;
                     if (args.length == 0) {
-                        message(sender, INFO, "JumpCube version %s", "0.0.1");
+                        message(sender, INFO, "JumpCube version %s", getDescription().getVersion());
                         return true;
                     } else if (args.length == 1 && args[0].equalsIgnoreCase("reload")) {
                         message(sender, ERROR, "Reloading not yet implemented");
