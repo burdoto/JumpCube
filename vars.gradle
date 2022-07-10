@@ -8,7 +8,6 @@ ext {
     mcVersion = '1.19'
     mcVersionMj = mcVersion.split('\\.').length == 3 ? mcVersion.substring(0, mcVersion.lastIndexOf('.')) : mcVersion
     spigotRC = 'R0.1'
-    pluginVersion = version.replace("-SNAPSHOT", "-alpha")
 
     pluginJarName = System.getenv().containsKey("JAR_NAME")
             ? System.getenv().get("JAR_NAME")
