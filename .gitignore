@@ -32,4 +32,6 @@ test/
 !test/eula.txt
 !test/server.properties
 
+libs/
+
 # End of https://www.gitignore.io/api/gradle,intellij
