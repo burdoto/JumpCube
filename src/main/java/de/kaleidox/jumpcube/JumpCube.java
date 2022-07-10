@@ -10,10 +10,10 @@ import de.kaleidox.jumpcube.exception.InnerCommandException;
 import de.kaleidox.jumpcube.exception.InvalidArgumentCountException;
 import de.kaleidox.jumpcube.exception.NoSuchCubeException;
 import de.kaleidox.jumpcube.util.BukkitUtil;
-import org.comroid.cmdr.spigot.SpigotCmdr;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.comroid.cmdr.spigot.SpigotCmdr;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -137,7 +137,7 @@ public final class JumpCube extends SpigotCmdr {
 
         this.logger = getLogger();
 
-        registerCommand(JumpCubeCommand.class);
+        registerCommands(JumpCubeCommand.class);
 
         saveConfig();
         saveDefaultConfig();
