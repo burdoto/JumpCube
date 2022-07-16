@@ -15,6 +15,7 @@ import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
+import org.comroid.cmdr.spigot.SpigotCmdr;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Comparator;
@@ -25,7 +26,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.IntStream;
 
 import static de.kaleidox.jumpcube.chat.Chat.message;
-import static de.kaleidox.jumpcube.chat.MessageLevel.INFO;
 import static de.kaleidox.jumpcube.cube.BlockBar.MaterialGroup.*;
 import static de.kaleidox.jumpcube.util.MathUtil.dist;
 import static de.kaleidox.jumpcube.util.MathUtil.mid;
@@ -141,7 +141,7 @@ public class ExistingCube implements Cube, Generatable, Startable, Initializable
                                 )))
                                 .orElseThrow(() -> new NoSuchCubeException(player));
                     JumpCube.instance.selections.put(player.getUniqueId(), sel);
-                    message(player, INFO, "Cube %s was automatically selected!", sel.getCubeName());
+                    message(player, SpigotCmdr.InfoColorizer, "Cube %s was automatically selected!", sel.getCubeName());
                     return sel;
                 });
     }
@@ -348,7 +348,7 @@ public class ExistingCube implements Cube, Generatable, Startable, Initializable
             if (full) ((ExistingCube) sel).generateFull();
             else ((ExistingCube) sel).generate();
 
-            message(sender, INFO, "Cube was regenerated!");
+            message(sender, SpigotCmdr.InfoColorizer, "Cube was regenerated!");
         }
     }
 }

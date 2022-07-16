@@ -8,11 +8,10 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.comroid.cmdr.spigot.SpigotCmdr;
 import org.jetbrains.annotations.NotNull;
 
 import static de.kaleidox.jumpcube.chat.Chat.message;
-import static de.kaleidox.jumpcube.chat.MessageLevel.HINT;
-import static de.kaleidox.jumpcube.chat.MessageLevel.WARN;
 import static de.kaleidox.jumpcube.util.WorldUtil.*;
 
 public class WorldListener extends ListenerBase implements Listener {
@@ -27,8 +26,8 @@ public class WorldListener extends ListenerBase implements Listener {
 
         if (event.getBlock().getType() != cube.getBlockBar().getPlaceable()) {
             event.setCancelled(true);
-            message(event.getPlayer(), WARN, "Don't destroy the cube!");
-        } else message(event.getPlayer(), HINT, "Here's your joker!");
+            message(event.getPlayer(), SpigotCmdr.WarnColorizer, "Don't destroy the cube!");
+        } else message(event.getPlayer(), SpigotCmdr.HintColorizer, "Here's your joker!");
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -38,7 +37,7 @@ public class WorldListener extends ListenerBase implements Listener {
 
         if (event.getBlockPlaced().getType() != cube.getBlockBar().getPlaceable()) {
             event.setCancelled(true);
-            message(event.getPlayer(), WARN, "You can only place %s!",
+            message(event.getPlayer(), SpigotCmdr.WarnColorizer, "You can only place %s!",
                     cube.getBlockBar().getPlaceable().name().toLowerCase());
         }
     }

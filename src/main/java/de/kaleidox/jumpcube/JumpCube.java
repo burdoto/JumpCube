@@ -1,15 +1,15 @@
 package de.kaleidox.jumpcube;
 
-import de.kaleidox.jumpcube.chat.MessageLevel;
 import de.kaleidox.jumpcube.cmd.JumpCubeCommand;
 import de.kaleidox.jumpcube.cube.BlockBar;
 import de.kaleidox.jumpcube.cube.Cube;
 import de.kaleidox.jumpcube.cube.CubeCreationTool;
 import de.kaleidox.jumpcube.cube.ExistingCube;
-import de.kaleidox.jumpcube.exception.InnerCommandException;
+import org.comroid.cmdr.spigot.InnerCommandException;
 import de.kaleidox.jumpcube.exception.InvalidArgumentCountException;
 import de.kaleidox.jumpcube.exception.NoSuchCubeException;
 import de.kaleidox.jumpcube.util.BukkitUtil;
+import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -22,8 +22,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 import static de.kaleidox.jumpcube.chat.Chat.message;
-import static de.kaleidox.jumpcube.chat.MessageLevel.ERROR;
-import static de.kaleidox.jumpcube.chat.MessageLevel.INFO;
 
 public final class JumpCube extends SpigotCmdr {
     public static final Random rng = new Random();
@@ -33,13 +31,20 @@ public final class JumpCube extends SpigotCmdr {
     public Map<UUID, Cube> selections = new ConcurrentHashMap<>();
     private Logger logger;
 
+    @Override
+    public String getChatPrefix() {
+        return ChatColor.DARK_GRAY + "[" +
+                ChatColor.BLUE + "JumpCube" +
+                ChatColor.DARK_GRAY + "] ";
+    }
+
     private static boolean validateSelection(CommandSender sender, Cube sel) {
         if (sel == null) {
-            message(sender, ERROR, "No cube selected!");
+            message(sender, ErrorColorizer, "No cube selected!");
             return false;
         }
         if (!(sel instanceof ExistingCube)) {
-            message(sender, ERROR, "Cube %s is not finished!", sel.getCubeName());
+            message(sender, ErrorColorizer, "Cube %s is not finished!", sel.getCubeName());
             return false;
         }
         return true;
@@ -69,7 +74,7 @@ public final class JumpCube extends SpigotCmdr {
             }
         } catch (InnerCommandException cEx) {
             message(sender, cEx.getLevel(), cEx.getIngameText());
-            if (cEx.getLevel() == MessageLevel.EXCEPTION)
+            if (cEx.getLevel().equals(ExceptionColorizer))
                 cEx.printStackTrace(System.out);
         }
 
@@ -232,7 +237,7 @@ public final class JumpCube extends SpigotCmdr {
                 if (args.length != 1) throw new InvalidArgumentCountException(1, args.length);
 
                 if (sel != null && sel.getCubeName().equals(args[0])) {
-                    message(sender, INFO, "Cube %s is already selected!", args[0]);
+                    message(sender, InfoColorizer, "Cube %s is already selected!", args[0]);
                     return;
                 }
                 if (!ExistingCube.exists(args[0])) throw new NoSuchCubeException(args[0]);
@@ -240,7 +245,7 @@ public final class JumpCube extends SpigotCmdr {
                 ExistingCube cube = ExistingCube.get(args[0]);
                 assert cube != null;
                 selections.put(senderUuid, cube);
-                message(sender, INFO, "Cube %s selected!", args[0]);
+                message(sender, InfoColorizer, "Cube %s selected!", args[0]);
                 return;
             case "pos":
             case "pos1":
@@ -306,14 +311,11 @@ public final class JumpCube extends SpigotCmdr {
                 if (args.length != 0) throw new InvalidArgumentCountException(0, args.length);
                 ((ExistingCube) sel).manager.start();
                 return;
-            case "test":
-                if (!sender.isOp()) return;
-                for (MessageLevel lvl : MessageLevel.values()) message(sender, lvl, "I am a %s.", "value");
         }
     }
 
     private void messagePerm(CommandSender sender, String permission) {
-        message(BukkitUtil.getPlayer(sender), ERROR, "You are missing the permission: %s", permission);
+        message(BukkitUtil.getPlayer(sender), ErrorColorizer, "You are missing the permission: %s", permission);
     }
 
     public static final class Permission {

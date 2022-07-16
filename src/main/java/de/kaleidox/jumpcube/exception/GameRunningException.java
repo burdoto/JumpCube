@@ -1,9 +1,10 @@
 package de.kaleidox.jumpcube.exception;
 
-import de.kaleidox.jumpcube.chat.MessageLevel;
+import org.comroid.cmdr.spigot.InnerCommandException;
+import org.comroid.cmdr.spigot.SpigotCmdr;
 
 public final class GameRunningException extends InnerCommandException {
     public GameRunningException(String message) {
-        super(MessageLevel.ERROR, message);
+        super(SpigotCmdr.ErrorColorizer, message);
     }
 }

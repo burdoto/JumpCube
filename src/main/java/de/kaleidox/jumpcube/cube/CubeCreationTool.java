@@ -9,10 +9,9 @@ import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
+import org.comroid.cmdr.spigot.SpigotCmdr;
 
 import static de.kaleidox.jumpcube.chat.Chat.message;
-import static de.kaleidox.jumpcube.chat.MessageLevel.ERROR;
-import static de.kaleidox.jumpcube.chat.MessageLevel.INFO;
 import static de.kaleidox.jumpcube.util.WorldUtil.dist;
 import static java.lang.Math.max;
 
@@ -130,7 +129,7 @@ public class CubeCreationTool implements Cube {
                     || (args.length > 0 && !subCommand.equals("pos")))
                 throw new InvalidArgumentCountException(subCommand.equals("pos") ? 1 : 0, args.length);
             if (subCommand.equals("pos") && !args[0].matches("[12]")) {
-                message(sender, ERROR, "Illegal argument: %s", args[0]);
+                message(sender, SpigotCmdr.ErrorColorizer, "Illegal argument: %s", args[0]);
                 return;
             }
 
@@ -139,15 +138,15 @@ public class CubeCreationTool implements Cube {
                 case "pos":
                     int argInt = Integer.parseInt(args[0]);
                     ((CubeCreationTool) sel).setPos(argInt, location);
-                    message(sender, INFO, "Position %s was set to your current location!", argInt);
+                    message(sender, SpigotCmdr.InfoColorizer, "Position %s was set to your current location!", argInt);
                     break;
                 case "pos1":
                     ((CubeCreationTool) sel).setPos(1, location);
-                    message(sender, INFO, "Position %s was set to your current location!", 1);
+                    message(sender, SpigotCmdr.InfoColorizer, "Position %s was set to your current location!", 1);
                     break;
                 case "pos2":
                     ((CubeCreationTool) sel).setPos(2, location);
-                    message(sender, INFO, "Position %s was set to your current location!", 2);
+                    message(sender, SpigotCmdr.InfoColorizer, "Position %s was set to your current location!", 2);
                     break;
             }
 
@@ -155,9 +154,9 @@ public class CubeCreationTool implements Cube {
             if (pos[0] != null && pos[1] != null) {
                 double dist = dist(pos[0], pos[1]);
                 if (dist < 0) dist = dist * -1;
-                if (dist < 32) message(sender, ERROR, "Size: %s (Cannot be smaller than 32)", (int) dist);
-                else if (dist > 64) message(sender, ERROR, "Size: %s (Cannot be larger than 64)", (int) dist);
-                else message(sender, INFO, "Size: %s (Even sizes are recommended)", (int) dist);
+                if (dist < 32) message(sender, SpigotCmdr.ErrorColorizer, "Size: %s (Cannot be smaller than 32)", (int) dist);
+                else if (dist > 64) message(sender, SpigotCmdr.ErrorColorizer, "Size: %s (Cannot be larger than 64)", (int) dist);
+                else message(sender, SpigotCmdr.InfoColorizer, "Size: %s (Even sizes are recommended)", (int) dist);
             }
         }
 
@@ -167,39 +166,39 @@ public class CubeCreationTool implements Cube {
             Player player = BukkitUtil.getPlayer(sender);
             ((CubeCreationTool) sel).bar = new BlockBar(player);
 
-            message(sender, INFO, "The BlockBar has been pasted relative to you.");
+            message(sender, SpigotCmdr.InfoColorizer, "The BlockBar has been pasted relative to you.");
         }
 
         public static void confirm(CommandSender sender, Cube sel) {
             if (!validateEditability(sender, sel)) return;
 
             if (!((CubeCreationTool) sel).isReady()) {
-                message(sender, ERROR, "Cube setup isn't complete yet!");
+                message(sender, SpigotCmdr.ErrorColorizer, "Cube setup isn't complete yet!");
                 return;
             }
 
             int[][] positions = sel.getPositions();
             if (dist(positions[0], positions[1]) < 32) {
-                message(sender, ERROR, "Cube must be at least %s blocks wide!", 32);
+                message(sender, SpigotCmdr.ErrorColorizer, "Cube must be at least %s blocks wide!", 32);
                 return;
             } else if (dist(positions[0], positions[1]) > 64) {
-                message(sender, ERROR, "Cube cant be wider than %s blocks!", 64);
+                message(sender, SpigotCmdr.ErrorColorizer, "Cube cant be wider than %s blocks!", 64);
                 return;
             }
 
             ExistingCube cube = ((CubeCreationTool) sel).create();
             cube.generateFull();
 
-            message(sender, INFO, "Cube %s was created!", cube.getCubeName());
+            message(sender, SpigotCmdr.InfoColorizer, "Cube %s was created!", cube.getCubeName());
         }
 
         private static boolean validateEditability(CommandSender sender, Cube sel) {
             if (sel == null) {
-                message(sender, ERROR, "No cube selected!");
+                message(sender, SpigotCmdr.ErrorColorizer, "No cube selected!");
                 return false;
             }
             if (!(sel instanceof CubeCreationTool)) {
-                message(sender, ERROR, "Cube %s is not editable!", sel.getCubeName());
+                message(sender, SpigotCmdr.ErrorColorizer, "Cube %s is not editable!", sel.getCubeName());
                 return false;
             }
             return true;

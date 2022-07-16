@@ -14,6 +14,7 @@ import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
+import org.comroid.cmdr.spigot.SpigotCmdr;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -30,7 +31,6 @@ import java.util.stream.IntStream;
 import static de.kaleidox.jumpcube.JumpCube.Permission.DEBUG_NOTIFY;
 import static de.kaleidox.jumpcube.chat.Chat.broadcast;
 import static de.kaleidox.jumpcube.chat.Chat.message;
-import static de.kaleidox.jumpcube.chat.MessageLevel.*;
 import static de.kaleidox.jumpcube.util.WorldUtil.location;
 import static de.kaleidox.jumpcube.util.WorldUtil.xyz;
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -59,18 +59,18 @@ public class GameManager implements Startable, Initializable {
 
         if (attemptedJoin.removeIf(id -> id.equals(uuid))) {
             // join user
-            message(sender, INFO, "Joining cube %s...", cube.getCubeName());
+            message(sender, SpigotCmdr.InfoColorizer, "Joining cube %s...", cube.getCubeName());
             Player player = BukkitUtil.getPlayer(sender);
             player.getInventory().remove(cube.getBlockBar().getPlaceable());
             prevLocations.put(player.getUniqueId(), new PrevLoc(player));
             cube.teleportIn(player);
             joined.add(player);
             if (scheduler == null) startTimer();
-            Chat.broadcast(DEBUG_NOTIFY, INFO, "Generating cube...");
+            Chat.broadcast(DEBUG_NOTIFY, SpigotCmdr.InfoColorizer, "Generating cube...");
             if (joined.size() == 1) cube.generate();
         } else {
             // warn user
-            message(sender, WARN, "Warning: You might die in the game! " +
+            message(sender, SpigotCmdr.WarnColorizer, "Warning: You might die in the game! " +
                     "If you still want to play, use the command again. You will also lose any item of type %s " +
                     "from your inventory!", cube.getBlockBar().getPlaceable().name());
 
@@ -99,11 +99,11 @@ public class GameManager implements Startable, Initializable {
             activeGame = false;
 
             if (player != null) {
-                broadcast(HINT, "%s has reached the goal!", player.getDisplayName());
+                broadcast(SpigotCmdr.HintColorizer, "%s has reached the goal!", player.getDisplayName());
                 joined.forEach(this::tpOut);
                 joined.clear();
                 leaving.clear();
-            } else broadcast(HINT, "All players left the cube. The game has ended.");
+            } else broadcast(SpigotCmdr.HintColorizer, "All players left the cube. The game has ended.");
         }
     }
 
@@ -160,7 +160,7 @@ public class GameManager implements Startable, Initializable {
 
         @Override
         public void run() {
-            broadcast(INFO, "Time remaining until cube %s will start: %s seconds", cube.getCubeName(), val);
+            broadcast(SpigotCmdr.InfoColorizer, "Time remaining until cube %s will start: %s seconds", cube.getCubeName(), val);
         }
     }
 }

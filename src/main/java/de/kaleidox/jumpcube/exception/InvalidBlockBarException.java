@@ -1,6 +1,7 @@
 package de.kaleidox.jumpcube.exception;
 
 import org.bukkit.Material;
+import org.comroid.cmdr.spigot.InnerCommandException;
 
 public final class InvalidBlockBarException extends InnerCommandException {
     public InvalidBlockBarException(Material errorMaterial, Cause cause) {

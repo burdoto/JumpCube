@@ -1,6 +1,7 @@
 package de.kaleidox.jumpcube.exception;
 
-import de.kaleidox.jumpcube.chat.MessageLevel;
+import org.comroid.cmdr.spigot.InnerCommandException;
+import org.comroid.cmdr.spigot.SpigotCmdr;
 
 public final class InvalidArgumentCountException extends InnerCommandException {
     @Override
@@ -9,7 +10,7 @@ public final class InvalidArgumentCountException extends InnerCommandException {
     }
 
     public InvalidArgumentCountException(int expected, int actual) {
-        super(MessageLevel.ERROR, String.format("Too %s arguments! Expected: %d",
+        super(SpigotCmdr.ErrorColorizer, String.format("Too %s arguments! Expected: %d",
                 (actual < expected ? "few" : "many"), expected));
     }
 }

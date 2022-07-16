@@ -14,11 +14,10 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
+import org.comroid.cmdr.spigot.SpigotCmdr;
 import org.jetbrains.annotations.NotNull;
 
 import static de.kaleidox.jumpcube.chat.Chat.message;
-import static de.kaleidox.jumpcube.chat.MessageLevel.ERROR;
-import static de.kaleidox.jumpcube.chat.MessageLevel.WARN;
 import static de.kaleidox.jumpcube.util.WorldUtil.*;
 
 public class PlayerListener extends ListenerBase implements Listener {
@@ -42,7 +41,7 @@ public class PlayerListener extends ListenerBase implements Listener {
         if (!manager.activeGame)
             if (inside(WorldUtil.retract(expand, 3), xyz(moveTo))) {
                 event.setCancelled(true);
-                message(event.getPlayer(), ERROR, "The game didn't start yet!");
+                message(event.getPlayer(), SpigotCmdr.ErrorColorizer, "The game didn't start yet!");
             }
     }
 
@@ -54,7 +53,7 @@ public class PlayerListener extends ListenerBase implements Listener {
                 || !manager.activeGame
                 || manager.leaving.contains(BukkitUtil.getUuid(event.getPlayer()))) return;
         event.setCancelled(true);
-        message(event.getPlayer(), WARN, "Use /jumpcube leave to leave the cube!");
+        message(event.getPlayer(), SpigotCmdr.WarnColorizer, "Use /jumpcube leave to leave the cube!");
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)

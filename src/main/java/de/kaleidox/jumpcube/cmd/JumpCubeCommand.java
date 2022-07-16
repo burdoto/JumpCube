@@ -1,21 +1,18 @@
 package de.kaleidox.jumpcube.cmd;
 
 import de.kaleidox.jumpcube.JumpCube;
-import de.kaleidox.jumpcube.chat.Chat;
-import de.kaleidox.jumpcube.chat.MessageLevel;
 import de.kaleidox.jumpcube.cube.Cube;
 import de.kaleidox.jumpcube.cube.CubeCreationTool;
 import de.kaleidox.jumpcube.cube.ExistingCube;
-import de.kaleidox.jumpcube.exception.InvalidArgumentCountException;
 import de.kaleidox.jumpcube.util.BukkitUtil;
 import org.bukkit.command.CommandSender;
 import org.comroid.cmdr.model.Command;
+import org.comroid.cmdr.spigot.SpigotCmdr;
 
 import java.util.UUID;
 
 import static de.kaleidox.jumpcube.chat.Chat.message;
-import static de.kaleidox.jumpcube.chat.MessageLevel.ERROR;
-import static de.kaleidox.jumpcube.chat.MessageLevel.INFO;
+import static org.comroid.cmdr.spigot.SpigotCmdr.*;
 
 @Command(name = "jumpcube")
 @Command.Alias("jc")
@@ -23,12 +20,12 @@ import static de.kaleidox.jumpcube.chat.MessageLevel.INFO;
 public class JumpCubeCommand {
     @Command
     public static String version() {
-        return Chat.makeMessage(INFO, "JumpCube version %s", JumpCube.instance.getDescription().getVersion());
+        return InfoColorizer.makeMessage("JumpCube version %s", JumpCube.instance.getDescription().getVersion());
     }
 
     @Command
     public static String reload() {
-        return Chat.makeMessage(ERROR, "Reloading not yet implemented");
+        return ErrorColorizer.makeMessage("Sorry, %s not yet implemented", "Reloading");
     }
 
     @Command
@@ -38,7 +35,7 @@ public class JumpCubeCommand {
         Cube sel = ExistingCube.getSelection(BukkitUtil.getPlayer(sender));
 
         if (ExistingCube.exists(name)) {
-            message(sender, ERROR, "A cube with the name %s already exists!", name);
+            message(sender, ErrorColorizer, "A cube with the name %s already exists!", name);
             return;
         }
 
@@ -51,6 +48,6 @@ public class JumpCubeCommand {
         CubeCreationTool creationTool = new CubeCreationTool(BukkitUtil.getPlayer(sender));
         creationTool.setName(name);
         pl.selections.put(senderUuid, creationTool);
-        message(sender, INFO, "Cube %s creation started!", name);
+        message(sender, InfoColorizer, "Cube %s creation started!", name);
     }
 }
