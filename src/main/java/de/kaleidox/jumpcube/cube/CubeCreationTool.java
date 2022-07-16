@@ -122,29 +122,16 @@ public class CubeCreationTool implements Cube {
     }
 
     public static final class Commands {
-        public static void pos(CommandSender sender, Cube sel, String subCommand, String[] args) {
+        public static void pos(CommandSender sender, Cube sel, int n) {
             if (!validateEditability(sender, sel)) return;
 
-            if ((args.length != 1 && subCommand.equals("pos"))
-                    || (args.length > 0 && !subCommand.equals("pos")))
-                throw new InvalidArgumentCountException(subCommand.equals("pos") ? 1 : 0, args.length);
-            if (subCommand.equals("pos") && !args[0].matches("[12]")) {
-                message(sender, SpigotCmdr.ErrorColorizer, "Illegal argument: %s", args[0]);
-                return;
-            }
-
             Location location = BukkitUtil.getPlayer(sender).getLocation();
-            switch (subCommand) {
-                case "pos":
-                    int argInt = Integer.parseInt(args[0]);
-                    ((CubeCreationTool) sel).setPos(argInt, location);
-                    message(sender, SpigotCmdr.InfoColorizer, "Position %s was set to your current location!", argInt);
-                    break;
-                case "pos1":
+            switch (n) {
+                case 1:
                     ((CubeCreationTool) sel).setPos(1, location);
                     message(sender, SpigotCmdr.InfoColorizer, "Position %s was set to your current location!", 1);
                     break;
-                case "pos2":
+                case 2:
                     ((CubeCreationTool) sel).setPos(2, location);
                     message(sender, SpigotCmdr.InfoColorizer, "Position %s was set to your current location!", 2);
                     break;
@@ -160,7 +147,7 @@ public class CubeCreationTool implements Cube {
             }
         }
 
-        public static void bar(CommandSender sender, Cube sel, String[] args) {
+        public static void bar(CommandSender sender, Cube sel) {
             if (!validateEditability(sender, sel)) return;
 
             Player player = BukkitUtil.getPlayer(sender);

@@ -20,6 +20,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 
 import static de.kaleidox.jumpcube.chat.Chat.message;
 
@@ -38,7 +39,7 @@ public final class JumpCube extends SpigotCmdr {
                 ChatColor.DARK_GRAY + "] ";
     }
 
-    private static boolean validateSelection(CommandSender sender, Cube sel) {
+    public static boolean validateSelection(CommandSender sender, Cube sel) {
         if (sel == null) {
             message(sender, ErrorColorizer, "No cube selected!");
             return false;
@@ -48,92 +49,6 @@ public final class JumpCube extends SpigotCmdr {
             return false;
         }
         return true;
-    }
-
-    public boolean _onCommand(@NotNull CommandSender sender,
-                             @NotNull Command command,
-                             @NotNull String label,
-                             @NotNull String[] args) {
-        UUID senderUuid = BukkitUtil.getUuid(sender);
-
-        try {
-            switch (label) {
-                case "jumpcube":
-                case "jc":
-                    if (!checkPerm(sender, Permission.USER)) return true;
-                    if (args.length == 0) {
-                        //message(sender, );
-                        return true;
-                    } else if (args.length == 1 && args[0].equalsIgnoreCase("reload")) {
-                        //message(sender, );
-                        return true;
-                    } else {
-                        subCommand(sender, args[0], Arrays.copyOfRange(args, 1, args.length));
-                        return true;
-                    }
-            }
-        } catch (InnerCommandException cEx) {
-            message(sender, cEx.getLevel(), cEx.getIngameText());
-            if (cEx.getLevel().equals(ExceptionColorizer))
-                cEx.printStackTrace(System.out);
-        }
-
-        return super.onCommand(sender, command, label, args);
-    }
-
-    @SuppressWarnings("SwitchStatementWithTooFewBranches")
-    public List<String> _onTabComplete(
-            @NotNull CommandSender sender,
-            @NotNull Command command,
-            @NotNull String alias,
-            @NotNull String[] args) {
-        List<String> list = new ArrayList<>();
-
-        switch (alias) {
-            case "jumpcube":
-            case "jc":
-                switch (args.length) {
-                    case 1:
-                        if (sender.hasPermission(Permission.USER)) {
-                            list.add("join");
-                            list.add("leave");
-                            list.add("select");
-                        }
-                        if (sender.hasPermission(Permission.START_EARLY)) {
-                            list.add("start");
-                        }
-                        if (sender.hasPermission(Permission.REGENERATE)) {
-                            list.add("regenerate");
-                            list.add("regenerate-complete");
-                        }
-                        if (sender.hasPermission(Permission.ADMIN)) {
-                            list.add("create");
-                            if (selections.get(BukkitUtil.getUuid(sender)) instanceof CubeCreationTool) {
-                                // user is currently creating a cube
-                                list.add("pos");
-                                list.add("bar");
-                                list.add("confirm");
-                            }
-                        }
-                        break;
-                    case 2:
-                        switch (args[0]) {
-                            case "pos":
-                                if (sender.hasPermission(Permission.ADMIN)) {
-                                    list.add("1");
-                                    list.add("2");
-                                }
-                                break;
-                        }
-                        break;
-                }
-                break;
-        }
-
-        if (args.length > 0)
-            list.removeIf(word -> word.indexOf(args[args.length - 1]) != 0);
-
-        return list;
     }
 
     @Override
@@ -222,100 +137,12 @@ public final class JumpCube extends SpigotCmdr {
         }
     }
 
-    private void subCommand(CommandSender sender, String subCommand, String[] args) {
-        final UUID senderUuid = BukkitUtil.getUuid(sender);
-        Cube sel = null;
-        if (subCommand.indexOf("sel") != 0)
-            sel = ExistingCube.getSelection(BukkitUtil.getPlayer(sender));
-
-        switch (subCommand.toLowerCase()) {
-            case "create":
-                return;
-            case "sel":
-            case "select":
-                if (!checkPerm(sender, Permission.USER)) return;
-                if (args.length != 1) throw new InvalidArgumentCountException(1, args.length);
-
-                if (sel != null && sel.getCubeName().equals(args[0])) {
-                    message(sender, InfoColorizer, "Cube %s is already selected!", args[0]);
-                    return;
-                }
-                if (!ExistingCube.exists(args[0])) throw new NoSuchCubeException(args[0]);
-
-                ExistingCube cube = ExistingCube.get(args[0]);
-                assert cube != null;
-                selections.put(senderUuid, cube);
-                message(sender, InfoColorizer, "Cube %s selected!", args[0]);
-                return;
-            case "pos":
-            case "pos1":
-            case "pos2":
-                if (!checkPerm(sender, Permission.ADMIN)) return;
-                if (sel == null)
-                    throw new NoSuchCubeException(BukkitUtil.getPlayer(sender));
-                CubeCreationTool.Commands.pos(sender, sel, subCommand, args);
-                return;
-            case "bar":
-                if (!checkPerm(sender, Permission.ADMIN)) return;
-                if (args.length != 0) throw new InvalidArgumentCountException(0, args.length);
-                if (sel == null)
-                    throw new NoSuchCubeException(BukkitUtil.getPlayer(sender));
-                CubeCreationTool.Commands.bar(sender, sel, args);
-                return;
-            case "confirm":
-                if (!checkPerm(sender, Permission.ADMIN)) return;
-                if (args.length != 0) throw new InvalidArgumentCountException(0, args.length);
-                if (sel == null)
-                    throw new NoSuchCubeException(BukkitUtil.getPlayer(sender));
-                CubeCreationTool.Commands.confirm(sender, sel);
-                return;
-            // Game commands
-            case "regenerate":
-            case "regen":
-                if (!checkPerm(sender, Permission.REGENERATE)) return;
-                if (sel == null)
-                    throw new NoSuchCubeException(BukkitUtil.getPlayer(sender));
-                if (!validateSelection(sender, sel)) return;
-                if (args.length != 0) throw new InvalidArgumentCountException(0, args.length);
-                ExistingCube.Commands.regenerate(sender, sel, false);
-                return;
-            case "regenerate-complete":
-            case "regen-complete":
-                if (!checkPerm(sender, Permission.REGENERATE)) return;
-                if (sel == null)
-                    throw new NoSuchCubeException(BukkitUtil.getPlayer(sender));
-                if (!validateSelection(sender, sel)) return;
-                if (args.length != 0) throw new InvalidArgumentCountException(0, args.length);
-                ExistingCube.Commands.regenerate(sender, sel, true);
-                return;
-            case "join":
-                if (!checkPerm(sender, Permission.USER)) return;
-                if (sel == null)
-                    throw new NoSuchCubeException(BukkitUtil.getPlayer(sender));
-                if (!validateSelection(sender, sel)) return;
-                if (args.length != 0) throw new InvalidArgumentCountException(0, args.length);
-                ((ExistingCube) sel).manager.join(sender);
-                return;
-            case "leave":
-                if (sel == null)
-                    throw new NoSuchCubeException(BukkitUtil.getPlayer(sender));
-                if (!validateSelection(sender, sel)) return;
-                if (args.length != 0) throw new InvalidArgumentCountException(0, args.length);
-                ((ExistingCube) sel).manager.leave(sender);
-                return;
-            case "start":
-                if (!checkPerm(sender, Permission.START_EARLY)) return;
-                if (sel == null)
-                    throw new NoSuchCubeException(BukkitUtil.getPlayer(sender));
-                if (!validateSelection(sender, sel)) return;
-                if (args.length != 0) throw new InvalidArgumentCountException(0, args.length);
-                ((ExistingCube) sel).manager.start();
-                return;
-        }
-    }
-
     private void messagePerm(CommandSender sender, String permission) {
         message(BukkitUtil.getPlayer(sender), ErrorColorizer, "You are missing the permission: %s", permission);
+    }
+
+    public static Stream<String> getCubeNames() {
+        return ExistingCube.getNames();
     }
 
     public static final class Permission {

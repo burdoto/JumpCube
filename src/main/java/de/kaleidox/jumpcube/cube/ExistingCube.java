@@ -24,6 +24,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static de.kaleidox.jumpcube.chat.Chat.message;
 import static de.kaleidox.jumpcube.cube.BlockBar.MaterialGroup.*;
@@ -170,6 +171,10 @@ public class ExistingCube implements Cube, Generatable, Startable, Initializable
         assert world != null : "Unknown world: " + config.getString(basePath + "world");
 
         return new ExistingCube(name, world, locs, bar);
+    }
+
+    public static Stream<String> getNames() {
+        return instances.values().stream().map(Cube::getCubeName);
     }
 
     @Override

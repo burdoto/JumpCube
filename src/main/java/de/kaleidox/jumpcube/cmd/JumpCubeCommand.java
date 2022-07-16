@@ -4,12 +4,15 @@ import de.kaleidox.jumpcube.JumpCube;
 import de.kaleidox.jumpcube.cube.Cube;
 import de.kaleidox.jumpcube.cube.CubeCreationTool;
 import de.kaleidox.jumpcube.cube.ExistingCube;
+import de.kaleidox.jumpcube.exception.InvalidArgumentCountException;
+import de.kaleidox.jumpcube.exception.NoSuchCubeException;
 import de.kaleidox.jumpcube.util.BukkitUtil;
 import org.bukkit.command.CommandSender;
 import org.comroid.cmdr.model.Command;
 import org.comroid.cmdr.spigot.SpigotCmdr;
 
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import static de.kaleidox.jumpcube.chat.Chat.message;
 import static org.comroid.cmdr.spigot.SpigotCmdr.*;
@@ -29,7 +32,7 @@ public class JumpCubeCommand {
     }
 
     @Command
-    public static void create(JumpCube pl, CommandSender sender, @Command.Arg(true) String name) {
+    public static void create(JumpCube pl, CommandSender sender, @Command.Arg String name) {
         if (!pl.checkPerm(sender, JumpCube.Permission.ADMIN)) return;
         UUID senderUuid = BukkitUtil.getUuid(sender);
         Cube sel = ExistingCube.getSelection(BukkitUtil.getPlayer(sender));
@@ -49,5 +52,95 @@ public class JumpCubeCommand {
         creationTool.setName(name);
         pl.selections.put(senderUuid, creationTool);
         message(sender, InfoColorizer, "Cube %s creation started!", name);
+    }
+
+    @Command
+    @Command.Alias("sel")
+    public static void select(JumpCube pl, CommandSender sender, @Command.Arg(autoComplete = "°getCubeNames") String name) {
+        if (!pl.checkPerm(sender, JumpCube.Permission.USER)) return;
+        UUID senderUuid = BukkitUtil.getUuid(sender);
+        Cube sel = ExistingCube.getSelection(BukkitUtil.getPlayer(sender));
+
+        if (sel != null && sel.getCubeName().equals(name)) {
+            message(sender, InfoColorizer, "Cube %s is already selected!", name);
+            return;
+        }
+        if (!ExistingCube.exists(name)) throw new NoSuchCubeException(name);
+
+        ExistingCube cube = ExistingCube.get(name);
+        assert cube != null;
+        pl.selections.put(senderUuid, cube);
+        message(sender, InfoColorizer, "Cube %s selected!", name);
+    }
+
+    @Command
+    public static void pos(JumpCube pl, CommandSender sender, @Command.Arg(autoComplete = {"1", "2"}) int n) {
+        if (!pl.checkPerm(sender, JumpCube.Permission.ADMIN)) return;
+        Cube sel = ExistingCube.getSelection(BukkitUtil.getPlayer(sender));
+
+        if (sel == null)
+            throw new NoSuchCubeException(BukkitUtil.getPlayer(sender));
+        CubeCreationTool.Commands.pos(sender, sel, n);
+    }
+
+    @Command
+    public static void bar(JumpCube pl, CommandSender sender) {
+        if (!pl.checkPerm(sender, JumpCube.Permission.ADMIN)) return;
+        Cube sel = ExistingCube.getSelection(BukkitUtil.getPlayer(sender));
+
+        if (sel == null)
+            throw new NoSuchCubeException(BukkitUtil.getPlayer(sender));
+        CubeCreationTool.Commands.bar(sender, sel);
+    }
+
+    @Command
+    public static void confirm(JumpCube pl, CommandSender sender) {
+        if (!pl.checkPerm(sender, JumpCube.Permission.ADMIN)) return;
+        Cube sel = ExistingCube.getSelection(BukkitUtil.getPlayer(sender));
+
+        if (sel == null)
+            throw new NoSuchCubeException(BukkitUtil.getPlayer(sender));
+        CubeCreationTool.Commands.confirm(sender, sel);
+    }
+
+    @Command
+    @Command.Alias("regen")
+    public static void regenerate(JumpCube pl, CommandSender sender, @Command.Arg(required = false, autoComplete = {"true","false"}) boolean full) {
+        if (!pl.checkPerm(sender, JumpCube.Permission.REGENERATE)) return;
+        Cube sel = ExistingCube.getSelection(BukkitUtil.getPlayer(sender));
+
+        if (sel == null)
+            throw new NoSuchCubeException(BukkitUtil.getPlayer(sender));
+        if (!JumpCube.validateSelection(sender, sel)) return;
+        ExistingCube.Commands.regenerate(sender, sel, full);
+    }
+
+    @Command
+    public static void join(JumpCube pl, CommandSender sender) {
+        if (!pl.checkPerm(sender, JumpCube.Permission.USER)) return;
+        Cube sel = ExistingCube.getSelection(BukkitUtil.getPlayer(sender));
+        if (sel == null)
+            throw new NoSuchCubeException(BukkitUtil.getPlayer(sender));
+        if (!JumpCube.validateSelection(sender, sel)) return;
+        ((ExistingCube) sel).manager.join(sender);
+    }
+
+    @Command
+    public static void leave(JumpCube pl, CommandSender sender) {
+        Cube sel = ExistingCube.getSelection(BukkitUtil.getPlayer(sender));
+        if (sel == null)
+            throw new NoSuchCubeException(BukkitUtil.getPlayer(sender));
+        if (!JumpCube.validateSelection(sender, sel)) return;
+        ((ExistingCube) sel).manager.leave(sender);
+    }
+
+    @Command
+    public static void start(JumpCube pl, CommandSender sender) {
+        if (!pl.checkPerm(sender, JumpCube.Permission.START_EARLY)) return;
+        Cube sel = ExistingCube.getSelection(BukkitUtil.getPlayer(sender));
+        if (sel == null)
+            throw new NoSuchCubeException(BukkitUtil.getPlayer(sender));
+        if (!JumpCube.validateSelection(sender, sel)) return;
+        ((ExistingCube) sel).manager.start();
     }
 }
