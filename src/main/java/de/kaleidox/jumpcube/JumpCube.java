@@ -3,18 +3,12 @@ package de.kaleidox.jumpcube;
 import de.kaleidox.jumpcube.cmd.JumpCubeCommand;
 import de.kaleidox.jumpcube.cube.BlockBar;
 import de.kaleidox.jumpcube.cube.Cube;
-import de.kaleidox.jumpcube.cube.CubeCreationTool;
 import de.kaleidox.jumpcube.cube.ExistingCube;
-import org.comroid.cmdr.spigot.InnerCommandException;
-import de.kaleidox.jumpcube.exception.InvalidArgumentCountException;
-import de.kaleidox.jumpcube.exception.NoSuchCubeException;
 import de.kaleidox.jumpcube.util.BukkitUtil;
 import org.bukkit.ChatColor;
-import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.comroid.cmdr.spigot.SpigotCmdr;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -37,6 +31,10 @@ public final class JumpCube extends SpigotCmdr {
         return ChatColor.DARK_GRAY + "[" +
                 ChatColor.BLUE + "JumpCube" +
                 ChatColor.DARK_GRAY + "] ";
+    }
+
+    public static Stream<String> getCubeNames() {
+        return ExistingCube.getNames();
     }
 
     public static boolean validateSelection(CommandSender sender, Cube sel) {
@@ -139,10 +137,6 @@ public final class JumpCube extends SpigotCmdr {
 
     private void messagePerm(CommandSender sender, String permission) {
         message(BukkitUtil.getPlayer(sender), ErrorColorizer, "You are missing the permission: %s", permission);
-    }
-
-    public static Stream<String> getCubeNames() {
-        return ExistingCube.getNames();
     }
 
     public static final class Permission {

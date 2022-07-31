@@ -8,7 +8,9 @@ public interface Cube {
     int[][] getPositions();
 
     int getGalleryHeight();
+
     int getHeight();
+
     int getBottom();
 
     BlockBar getBlockBar();

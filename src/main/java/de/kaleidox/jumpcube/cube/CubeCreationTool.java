@@ -1,7 +1,6 @@
 package de.kaleidox.jumpcube.cube;
 
 import de.kaleidox.jumpcube.JumpCube;
-import de.kaleidox.jumpcube.exception.InvalidArgumentCountException;
 import de.kaleidox.jumpcube.util.BukkitUtil;
 import de.kaleidox.jumpcube.util.WorldUtil;
 import org.bukkit.Location;
@@ -13,7 +12,6 @@ import org.comroid.cmdr.spigot.SpigotCmdr;
 
 import static de.kaleidox.jumpcube.chat.Chat.message;
 import static de.kaleidox.jumpcube.util.WorldUtil.dist;
-import static java.lang.Math.max;
 
 public class CubeCreationTool implements Cube {
     public final Player player;
@@ -141,8 +139,10 @@ public class CubeCreationTool implements Cube {
             if (pos[0] != null && pos[1] != null) {
                 double dist = dist(pos[0], pos[1]);
                 if (dist < 0) dist = dist * -1;
-                if (dist < 32) message(sender, SpigotCmdr.ErrorColorizer, "Size: %s (Cannot be smaller than 32)", (int) dist);
-                else if (dist > 64) message(sender, SpigotCmdr.ErrorColorizer, "Size: %s (Cannot be larger than 64)", (int) dist);
+                if (dist < 32)
+                    message(sender, SpigotCmdr.ErrorColorizer, "Size: %s (Cannot be smaller than 32)", (int) dist);
+                else if (dist > 64)
+                    message(sender, SpigotCmdr.ErrorColorizer, "Size: %s (Cannot be larger than 64)", (int) dist);
                 else message(sender, SpigotCmdr.InfoColorizer, "Size: %s (Even sizes are recommended)", (int) dist);
             }
         }

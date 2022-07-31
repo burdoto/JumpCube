@@ -4,18 +4,16 @@ import de.kaleidox.jumpcube.JumpCube;
 import de.kaleidox.jumpcube.cube.Cube;
 import de.kaleidox.jumpcube.cube.CubeCreationTool;
 import de.kaleidox.jumpcube.cube.ExistingCube;
-import de.kaleidox.jumpcube.exception.InvalidArgumentCountException;
 import de.kaleidox.jumpcube.exception.NoSuchCubeException;
 import de.kaleidox.jumpcube.util.BukkitUtil;
 import org.bukkit.command.CommandSender;
 import org.comroid.cmdr.model.Command;
-import org.comroid.cmdr.spigot.SpigotCmdr;
 
 import java.util.UUID;
-import java.util.stream.Stream;
 
 import static de.kaleidox.jumpcube.chat.Chat.message;
-import static org.comroid.cmdr.spigot.SpigotCmdr.*;
+import static org.comroid.cmdr.spigot.SpigotCmdr.ErrorColorizer;
+import static org.comroid.cmdr.spigot.SpigotCmdr.InfoColorizer;
 
 @Command(name = "jumpcube")
 @Command.Alias("jc")
@@ -105,7 +103,7 @@ public class JumpCubeCommand {
 
     @Command
     @Command.Alias("regen")
-    public static void regenerate(JumpCube pl, CommandSender sender, @Command.Arg(required = false, autoComplete = {"true","false"}) boolean full) {
+    public static void regenerate(JumpCube pl, CommandSender sender, @Command.Arg(required = false, autoComplete = {"true", "false"}) boolean full) {
         if (!pl.checkPerm(sender, JumpCube.Permission.REGENERATE)) return;
         Cube sel = ExistingCube.getSelection(BukkitUtil.getPlayer(sender));
 

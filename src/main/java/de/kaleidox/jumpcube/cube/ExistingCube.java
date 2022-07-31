@@ -67,19 +67,19 @@ public class ExistingCube implements Cube, Generatable, Startable, Initializable
 
     @Override
     public int getGalleryHeight() {
-        int galleryHeight = JumpCube.instance.getConfig().getInt("cubes."+getCubeName()+".gallery.height", -1);
+        int galleryHeight = JumpCube.instance.getConfig().getInt("cubes." + getCubeName() + ".gallery.height", -1);
         return galleryHeight == -1 ? JumpCube.instance.getConfig().getInt("cube.defaults.gallery.height") : galleryHeight;
     }
 
     @Override
     public int getHeight() {
-        int height = JumpCube.instance.getConfig().getInt("cubes."+getCubeName()+".height", -1);
+        int height = JumpCube.instance.getConfig().getInt("cubes." + getCubeName() + ".height", -1);
         return height == -1 ? JumpCube.instance.getConfig().getInt("cube.defaults.height") : height;
     }
 
     @Override
     public int getBottom() {
-        int bottom = JumpCube.instance.getConfig().getInt("cubes."+getCubeName()+".bottom", -1);
+        int bottom = JumpCube.instance.getConfig().getInt("cubes." + getCubeName() + ".bottom", -1);
         return bottom == -1 ? JumpCube.instance.getConfig().getInt("cube.defaults.bottom") : bottom;
     }
 
@@ -91,6 +91,10 @@ public class ExistingCube implements Cube, Generatable, Startable, Initializable
     @Override
     public World getWorld() {
         return world;
+    }
+
+    public static Stream<String> getNames() {
+        return instances.values().stream().map(Cube::getCubeName);
     }
 
     private ExistingCube(String name, World world, int[][] positions, BlockBar bar) {
@@ -171,10 +175,6 @@ public class ExistingCube implements Cube, Generatable, Startable, Initializable
         assert world != null : "Unknown world: " + config.getString(basePath + "world");
 
         return new ExistingCube(name, world, locs, bar);
-    }
-
-    public static Stream<String> getNames() {
-        return instances.values().stream().map(Cube::getCubeName);
     }
 
     @Override
