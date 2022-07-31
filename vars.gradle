@@ -12,7 +12,6 @@ ext {
     pluginJarName = System.getenv().containsKey("JAR_NAME")
             ? System.getenv().get("JAR_NAME")
             : "$name-mc$mcVersion@${project.version}.jar"
-    testServerDir = System.getenv().containsKey('TEST_SERVER_DIR')
-            ? System.getenv('TEST_SERVER_DIR')
-            : file(".").absolutePath
+    testServerDir = projectDir.absolutePath + '/build/test'
+//System.getenv().containsKey('TEST_SERVER_DIR') ? System.getenv('TEST_SERVER_DIR') : file(".").absolutePath
 }
