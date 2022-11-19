@@ -31,7 +31,7 @@ repositories {
 
 dependencies {
     compileOnly "org.spigotmc:spigot-api:$mcVersion-$spigotRC-SNAPSHOT"
-    compileOnly 'org.jetbrains:annotations:20.1.0'
+    compileOnly 'org.jetbrains:annotations:23.0.0'
     compileOnly fileTree("libs/")
     implementation parent.name == 'repo' || parent.name == 'java' ? project(":cmdr:spigot") : 'org.comroid:cmdr-spigot:0.+'
 }
