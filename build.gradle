@@ -14,16 +14,11 @@ version '0.1.4-SNAPSHOT'
 
 apply from: 'vars.gradle'
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+sourceCompatibility = 11
+targetCompatibility = 11
 
 repositories {
     mavenLocal()
-    maven {
-        url = 'https://maven.jetbrains.space/comroid/repo'
-        credentials.username = 'Anonymous.User'
-        credentials.password = 'anonymous'
-    }
     maven { url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/' }
     jcenter()
     maven { url = 'https://oss.sonatype.org/content/repositories/snapshots' }
