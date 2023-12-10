@@ -3,7 +3,7 @@ plugins {
 }
 
 tasks.findByName('wrapper')?.configure {
-    gradleVersion = '6.2'
+    gradleVersion = '7.5'
     distributionUrl = "https://services.gradle.org/distributions/gradle-$gradleVersion-all.zip"
 }
 
@@ -14,21 +14,32 @@ version '0.1.4-SNAPSHOT'
 
 apply from: 'vars.gradle'
 
-sourceCompatibility = 11
-targetCompatibility = 11
+sourceCompatibility = 17
+targetCompatibility = 17
 
 repositories {
     mavenLocal()
+    maven { url = 'https://maven.comroid.org' }
     maven { url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/' }
     jcenter()
     maven { url = 'https://oss.sonatype.org/content/repositories/snapshots' }
 }
 
 dependencies {
+    if (findProject(':japi') != null)
+        implementation project(':japi')
+    else implementation 'org.comroid:api:1.+'
+    if (findProject(':cmdr-spigot') != null)
+        implementation project(':cmdr-spigot')
+    else implementation 'org.comroid:cmdr-spigot:0.+'
+
     compileOnly "org.spigotmc:spigot-api:$mcVersion-$spigotRC-SNAPSHOT"
     compileOnly 'org.jetbrains:annotations:23.0.0'
     compileOnly fileTree("libs/")
-    implementation parent.name == 'repo' || parent.name == 'java' ? project(":cmdr:spigot") : 'org.comroid:cmdr-spigot:0.+'
+
+    // lombok
+    compileOnly 'org.projectlombok:lombok:1.18.30'
+    annotationProcessor 'org.projectlombok:lombok:1.18.30'
 }
 
 apply plugin: 'com.github.johnrengelman.shadow'
