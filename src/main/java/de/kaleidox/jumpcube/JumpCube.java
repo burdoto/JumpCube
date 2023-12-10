@@ -114,11 +114,7 @@ public final class JumpCube extends SpigotCmdr {
                         ExistingCube.load(config, cubeName, null);
                         logger.info("Loaded cube: " + cubeName);
                     } catch (Throwable t) {
-                        logger.throwing(
-                                ExistingCube.class.getName(),
-                                "load",
-                                new RuntimeException("Error loading cube: " + cubeName, t)
-                        );
+                        logger.throwing(ExistingCube.class.getName(), "load", t);
                     }
                 }));
 
