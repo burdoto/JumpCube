@@ -5,7 +5,7 @@ author: Kaleidox
 description: Continuation of the DeathCube plugin
 api-version: ${mcVersionMj}
 softdepend:
-  - Spiroid
+  - WorldGuard
 commands:
   jumpcube:
     description: JumpCube command
