@@ -5,8 +5,6 @@ import de.kaleidox.jumpcube.exception.DuplicateCubeException;
 import de.kaleidox.jumpcube.exception.NoSuchCubeException;
 import de.kaleidox.jumpcube.game.GameManager;
 import de.kaleidox.jumpcube.interfaces.Generatable;
-import de.kaleidox.jumpcube.interfaces.Initializable;
-import de.kaleidox.jumpcube.interfaces.Startable;
 import de.kaleidox.jumpcube.util.WorldUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -15,6 +13,8 @@ import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
+import org.comroid.api.Initializable;
+import org.comroid.api.Startable;
 import org.comroid.cmdr.spigot.SpigotCmdr;
 import org.jetbrains.annotations.Nullable;
 
@@ -114,7 +114,7 @@ public class ExistingCube implements Cube, Generatable, Startable, Initializable
 
         instances.put(name, this);
 
-        init();
+        initialize();
     }
 
     @Nullable
@@ -334,8 +334,8 @@ public class ExistingCube implements Cube, Generatable, Startable, Initializable
     }
 
     @Override
-    public void init() {
-        manager.init();
+    public void initialize() {
+        manager.initialize();
 
         final int galleryHeight = getGalleryHeight();
 

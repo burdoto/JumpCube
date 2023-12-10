@@ -6,14 +6,14 @@ import de.kaleidox.jumpcube.cube.ExistingCube;
 import de.kaleidox.jumpcube.exception.GameRunningException;
 import de.kaleidox.jumpcube.game.listener.PlayerListener;
 import de.kaleidox.jumpcube.game.listener.WorldListener;
-import de.kaleidox.jumpcube.interfaces.Initializable;
-import de.kaleidox.jumpcube.interfaces.Startable;
 import de.kaleidox.jumpcube.util.BukkitUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
+import org.comroid.api.Initializable;
+import org.comroid.api.Startable;
 import org.comroid.cmdr.spigot.SpigotCmdr;
 import org.jetbrains.annotations.Nullable;
 
@@ -85,7 +85,7 @@ public class GameManager implements Startable, Initializable {
     }
 
     @Override
-    public void init() {
+    public void initialize() {
         assert JumpCube.instance != null;
         PluginManager pluginManager = Bukkit.getServer().getPluginManager();
 
