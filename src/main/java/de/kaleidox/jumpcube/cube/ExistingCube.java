@@ -243,6 +243,27 @@ public class ExistingCube implements Cube, Generatable, Startable, Initializable
                 }
         }
 
+        final int spaceX = (int) (Math.abs(pos[1][0] - pos[0][0]) * spacing);
+        final int spaceZ = (int) (Math.abs(pos[1][2] - pos[0][2]) * spacing);
+
+        IntStream.range(2, mid(spaceX, spaceZ))
+                .forEach(off -> {
+                    final int minXoff = minX + off;
+                    final int maxXoff = maxX - off;
+                    final int minZoff = minZ + off;
+                    final int maxZoff = maxZ - off;
+
+                    int x_, z_;
+
+                    for (x_ = minXoff; x_ <= maxXoff; x_++)
+                        for (z_ = minZoff; z_ <= maxZoff; z_++)
+                            if (off == 2 && (x_ == minXoff || x_ == maxXoff || z_ == minZoff || z_ == maxZoff))
+                                // renew glass panes
+                                world.getBlockAt(x_, galleryHeight + 1, z_).setType(GLASS_PANE);
+                            else // remove gallery extensions
+                                world.getBlockAt(x_, galleryHeight, z_).setType(AIR);
+                });
+
         generate();
     }
 
@@ -252,31 +273,10 @@ public class ExistingCube implements Cube, Generatable, Startable, Initializable
 
         final int spaceX = (int) (Math.abs(pos[1][0] - pos[0][0]) * spacing);
         final int spaceZ = (int) (Math.abs(pos[1][2] - pos[0][2]) * spacing);
-        final boolean smallX = pos[0][0] < pos[1][0];
-        final boolean smallZ = pos[0][2] < pos[1][2];
 
         int x, y, z;
         final int height = getHeight();
         final int bottom = getBottom();
-        final int galleryHeight = getGalleryHeight();
-
-        IntStream.range(2, mid(spaceX, spaceZ))
-                .forEach(off -> {
-                    final int minXoff = minX + off;
-                    final int maxXoff = maxX - off;
-                    final int minZoff = minZ + off;
-                    final int maxZoff = maxZ - off;
-
-                    int x_, y_ = galleryHeight, z_;
-
-                    for (x_ = minXoff; x_ <= maxXoff; x_++)
-                        for (z_ = minZoff; z_ <= maxZoff; z_++)
-                            if (off == 2 && (x_ == minXoff || x_ == maxXoff || z_ == minZoff || z_ == maxZoff))
-                                // renew glass panes
-                                world.getBlockAt(x_, y_ + 1, z_).setType(GLASS_PANE);
-                            else // remove gallery extensions
-                                world.getBlockAt(x_, y_, z_).setType(AIR);
-                });
 
         for (x = minX + spaceX; x <= maxX - spaceX; x++)
             for (z = minZ + spaceZ; z <= maxZ - spaceZ; z++)
