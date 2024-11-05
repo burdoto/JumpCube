@@ -1,27 +1,37 @@
 plugins {
-    id "com.github.johnrengelman.shadow" version "6.1.0"
-}
-
-tasks.findByName('wrapper')?.configure {
-    gradleVersion = '7.5'
-    distributionUrl = "https://services.gradle.org/distributions/gradle-$gradleVersion-all.zip"
+    id 'java'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
 }
 
 apply plugin: 'java'
 
 group 'org.comroid'
-version '0.1.4-SNAPSHOT'
+version '0.2.0-SNAPSHOT'
 
-apply from: 'vars.gradle'
+shadowJar {
+    // Exclude dependencies by ensuring the JAR contains only the classes
+    configurations = [project.configurations.shadow]
+}
 
-sourceCompatibility = 17
-targetCompatibility = 17
+tasks.register('testPlugin', Copy) {
+    dependsOn shadowJar//, dlArclightServerJar, dlPaperServerJar, dlSpigotServerJar
+    from shadowJar.outputs.files.singleFile
+    into "${projectDir}/run/plugins"
+    rename { n -> "WorldMod-spigot.jar" }
+}
+
+task simplifyArtifact(type: Copy) {
+    dependsOn test, shadowJar
+    from shadowJar.outputs.files.singleFile
+    into "$rootDir/build/libs/"
+    rename { n -> "WorldMod-spigot.jar" }
+}
 
 repositories {
     mavenLocal()
     maven { url = 'https://maven.comroid.org' }
     maven { url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/' }
-    jcenter()
+    mavenCentral()
     maven { url = 'https://oss.sonatype.org/content/repositories/snapshots' }
 }
 
@@ -33,14 +43,12 @@ dependencies {
         implementation project(':cmdr-spigot')
     else implementation 'org.comroid:cmdr-spigot:0.+'
 
-    compileOnly "org.spigotmc:spigot-api:$mcVersion-$spigotRC-SNAPSHOT"
+    implementation project(':LibMod:spigot')
+
+    compileOnly 'org.spigotmc:spigot-api:1.20-R0.1-SNAPSHOT'
     compileOnly 'org.jetbrains:annotations:23.0.0'
-    compileOnly fileTree("libs/")
 
     // lombok
     compileOnly 'org.projectlombok:lombok:1.18.30'
     annotationProcessor 'org.projectlombok:lombok:1.18.30'
 }
-
-apply plugin: 'com.github.johnrengelman.shadow'
-apply from: 'jar.gradle'

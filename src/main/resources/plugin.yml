@@ -1,11 +1,13 @@
 main: de.kaleidox.jumpcube.JumpCube
-name: ${project.name}
-version: ${version}
+name: JumpCube
+version: 0.2.0-SNAPSHOT
 author: Kaleidox
 description: Continuation of the DeathCube plugin
-api-version: ${mcVersionMj}
+api-version: 1.20
+depend:
+  - LibMod
 softdepend:
-  - WorldGuard
+  - WorldMod
 commands:
   jumpcube:
     description: JumpCube command

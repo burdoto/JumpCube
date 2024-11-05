@@ -1,0 +1,16 @@
+defaults:
+  settings:
+    height: 120 # total height
+    bottom: -60 # rock bottom y level
+    gallery: -20 # gallery y level
+  materials:
+    cube:
+      - red_wool
+      - yellow_wool
+      - blue_wool
+    walls:
+      - red_concrete
+      - yellow_concrete
+      - blue_concrete
+    gallery: light_gray_concrete
+    placeable: pumpkin

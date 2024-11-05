@@ -52,6 +52,7 @@ public class BlockBar implements Generatable {
     }
 
     public static void initConfig(FileConfiguration config) {
+        /* todo fixme */
         configMaterials[0] = BukkitUtil.getMaterial(config.getString("cube.defaults.bar.a"))
                 .orElse(Material.RED_WOOL);
         configMaterials[1] = BukkitUtil.getMaterial(config.getString("cube.defaults.bar.b"))
