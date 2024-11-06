@@ -10,6 +10,7 @@ import de.kaleidox.jumpcube.game.GameManager;
 import de.kaleidox.jumpcube.interfaces.Generatable;
 import de.kaleidox.jumpcube.util.WorldUtil;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.Singular;
 import lombok.experimental.SuperBuilder;
 import org.bukkit.Location;
@@ -54,6 +55,7 @@ import static org.bukkit.Material.*;
 @Data
 @Entity
 @SuperBuilder
+@NoArgsConstructor
 @Table(name = "jumpcubes")
 public class ExistingCube extends DbObject.WithPoiName implements Cube, Generatable, Initializable {
     private final static Map<String, Cube>                                               instances = new ConcurrentHashMap<>();
