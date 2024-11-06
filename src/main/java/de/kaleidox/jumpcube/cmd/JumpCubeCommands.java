@@ -68,7 +68,6 @@ public class JumpCubeCommands {
                 message().target(sender).sendMessage(BroadcastType.INFO, "Cube {} is already selected!", name);
                 return;
             }
-            if (!ExistingCube.exists(name)) throw new NoSuchCubeException(name);
 
             ExistingCube cube = ExistingCube.get(name);
             assert cube != null;

@@ -35,12 +35,9 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 import static de.kaleidox.jumpcube.JumpCube.*;
 import static de.kaleidox.jumpcube.cube.BlockPool.MaterialGroup.*;
@@ -58,41 +55,38 @@ import static org.bukkit.Material.*;
 @NoArgsConstructor
 @Table(name = "jumpcubes")
 public class ExistingCube extends DbObject.WithPoiName implements Cube, Generatable, Initializable {
-    private final static Map<String, Cube>                                               instances = new ConcurrentHashMap<>();
-    public static final  EntityType<ExistingCube, ExistingCube.Builder<ExistingCube, ?>> TYPE      = Polyfill.uncheckedCast(new EntityType<>(ExistingCube::builder,
+    public static final EntityType<ExistingCube, ExistingCube.Builder<ExistingCube, ?>> TYPE = Polyfill.uncheckedCast(new EntityType<>(ExistingCube::builder,
             null,
             ExistingCube.class,
             ExistingCube.Builder.class));
 
-    public static Stream<String> getNames() {
-        return instances.values().stream().map(Cube::getCubeName);
-    }
-
-    @Nullable
-    public static ExistingCube get(String name) {
-        return (ExistingCube) instances.get(name);
-    }
-
     public static boolean exists(String name) {
-        return instances.containsKey(name);
+        return instance.getLib().getEntityService()
+                .getAccessor(ExistingCube.TYPE)
+                .all()
+                .map(ExistingCube::getCubeName)
+                .anyMatch(name::equalsIgnoreCase);
+    }
+
+    public static ExistingCube get(String name) {
+        return instance.getLib().getEntityService()
+                .getAccessor(ExistingCube.TYPE)
+                .all()
+                .filter(cube -> cube.getCubeName().equals(name))
+                .findAny().orElseThrow(() -> new NoSuchCubeException(name));
     }
 
     public static Cube getSelection(Player player) {
         assert JumpCube.instance != null;
-
-        return Optional.ofNullable(JumpCube.instance.selections.get(player.getUniqueId())).orElseGet(() -> {
-            Cube sel = null;
-            if (instances.size() == 0) return null;
-            if (instances.size() == 1) sel = instances.entrySet().iterator().next().getValue();
-            if (sel == null) sel = instances.values()
-                    .stream()
-                    .filter(cube -> cube.getWorld().equals(player.getWorld()))
-                    .min(Comparator.comparingDouble(cube -> WorldUtil.dist(mid(cube.getPositions()), xyz(player.getLocation()))))
-                    .orElseThrow(() -> new NoSuchCubeException(player));
-            JumpCube.instance.selections.put(player.getUniqueId(), sel);
-            message().target(player).sendMessage("Cube {} was automatically selected!", sel.getCubeName());
-            return sel;
-        });
+        return Optional.ofNullable(JumpCube.instance.selections.get(player.getUniqueId()))
+                .or(() -> instance.getLib().getEntityService()
+                        .getAccessor(ExistingCube.TYPE)
+                        .all()
+                        .filter(cube -> cube.getWorld().equals(player.getWorld()))
+                        .sorted(Comparator.comparingDouble(cube -> WorldUtil.dist(mid(cube.getPositions()), xyz(player.getLocation()))))
+                        .peek(cube -> message().target(player).sendMessage("Cube {} was automatically selected!", cube.getCubeName()))
+                        .findFirst())
+                .orElse(null);
     }
 
     public final @Transient GameManager manager = new GameManager(this);

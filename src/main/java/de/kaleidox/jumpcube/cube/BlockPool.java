@@ -11,6 +11,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.Optional;
 
+import static java.util.function.Predicate.*;
+
 @Value
 @Builder
 public class BlockPool {
@@ -65,7 +67,7 @@ public class BlockPool {
     }
 
     public List<Material> get(MaterialGroup group) {
-        return Optional.ofNullable(getRaw(group)).orElseGet(() -> JumpCube.instance.defaultBlockPool.get(group));
+        return Optional.ofNullable(getRaw(group)).filter(not(List::isEmpty)).orElseGet(() -> JumpCube.instance.defaultBlockPool.get(group));
     }
 
     public boolean isDefault(MaterialGroup group) {

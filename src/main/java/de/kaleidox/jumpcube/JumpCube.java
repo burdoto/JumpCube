@@ -18,15 +18,10 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
-import java.util.stream.Stream;
 
 public final class JumpCube extends SubMod$Spigot {
     public static final Random   rng = new Random();
     public static       JumpCube instance;
-
-    public static Stream<String> getCubeNames() {
-        return ExistingCube.getNames();
-    }
 
     public static BroadcastWrapper message() {
         return instance.broadcast;
