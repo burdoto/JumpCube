@@ -1,16 +1,14 @@
 package de.kaleidox.jumpcube;
 
+import com.ampznetwork.libmod.api.util.chat.BroadcastType;
+import com.ampznetwork.libmod.api.util.chat.BroadcastWrapper;
 import com.ampznetwork.libmod.spigot.SubMod$Spigot;
 import de.kaleidox.jumpcube.cmd.JumpCubeCommand;
-import de.kaleidox.jumpcube.cube.BlockBar;
+import de.kaleidox.jumpcube.cube.BlockPool;
 import de.kaleidox.jumpcube.cube.Cube;
 import de.kaleidox.jumpcube.cube.ExistingCube;
-import de.kaleidox.jumpcube.util.BukkitUtil;
-import net.kyori.adventure.audience.Audience;
-import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.comroid.cmdr.spigot.SpigotCmdr;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -18,39 +16,33 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
-import static de.kaleidox.jumpcube.chat.Chat.message;
-
 public final class JumpCube extends SubMod$Spigot {
-    public static final Random rng = new Random();
-    @Nullable
-    public static JumpCube instance;
-
-    public Map<UUID, Cube> selections = new ConcurrentHashMap<>();
-    private Logger logger;
-    private FileConfiguration config;
-
-    @Override
-    public String getChatPrefix() {
-        return ChatColor.DARK_GRAY + "[" +
-                ChatColor.BLUE + "JumpCube" +
-                ChatColor.DARK_GRAY + "] ";
-    }
+    public static final Random   rng = new Random();
+    public static       JumpCube instance;
 
     public static Stream<String> getCubeNames() {
         return ExistingCube.getNames();
     }
 
-    public static boolean validateSelection(CommandSender sender, Cube sel) {
+    public JumpCube() {
+        super(Set.of(Capability.Database), Set.of(ExistingCube.class/*, GameReview.class*/));
+    }
+
+    public boolean validateSelection(CommandSender sender, Cube sel) {
         if (sel == null) {
-            message(sender, ErrorColorizer, "No cube selected!");
+            broadcast.target(sender).sendMessage(BroadcastType.ERROR, "No cube selected!");
             return false;
         }
         if (!(sel instanceof ExistingCube)) {
-            message(sender, ErrorColorizer, "Cube %s is not finished!", sel.getCubeName());
+            broadcast.target(sender).sendMessage(BroadcastType.ERROR, "Cube {} is not finished!", sel.getCubeName());
             return false;
         }
         return true;
     }
+    public  Map<UUID, Cube>  selections = new ConcurrentHashMap<>();
+    public  BroadcastWrapper broadcast;
+    private Logger           logger;
+    private FileConfiguration config;
 
     @Override
     public void onLoad() {
@@ -59,12 +51,21 @@ public final class JumpCube extends SubMod$Spigot {
 
         super.onLoad();
 
-        this.config = super.getConfig();
-        this.logger = getLogger();
+        this.config    = super.getConfig();
+        this.broadcast = new BroadcastWrapper(lib, "JumpCube");
+        this.logger    = getLogger();
 
-        BlockBar.initConfig(config);
+        BlockPool.initConfig(config);
 
         logger.info("JumpCube loaded!");
+    }
+
+    @Override
+    public void onDisable() {
+        super.onDisable();
+        instance = null;
+
+        logger.info("JumpCube disabled!");
     }
 
     @Override
@@ -90,14 +91,6 @@ public final class JumpCube extends SubMod$Spigot {
         logger.info("Please report bugs at https://github.com/burdoto/jumpcube/issues");
     }
 
-    @Override
-    public void onDisable() {
-        super.onDisable();
-        instance = null;
-
-        logger.info("JumpCube disabled!");
-    }
-
     public boolean checkPerm(CommandSender sender, String permission) {
         if (sender.hasPermission(permission))
             return true;
@@ -108,19 +101,19 @@ public final class JumpCube extends SubMod$Spigot {
     }
 
     private void messagePerm(CommandSender sender, String permission) {
-        message(BukkitUtil.getPlayer(sender), ErrorColorizer, "You are missing the permission: %s", permission);
+        broadcast.target(sender).sendMessage(BroadcastType.ERROR, "You are missing the permission: {}", permission);
     }
 
     public static final class Permission {
         public static final String USER = "jumpcube.user";
 
-        public static final String START_EARLY = "jumpcube.vip.earlystart";
+        public static final String START_EARLY     = "jumpcube.vip.earlystart";
         public static final String BRING_PLACEABLE = "jumpcube.vip.bringplaceable";
 
         public static final String TELEPORT_OUT = "jumpcube.mod.teleport";
-        public static final String REGENERATE = "jumpcube.mod.regenerate";
+        public static final String REGENERATE   = "jumpcube.mod.regenerate";
 
-        public static final String ADMIN = "jumpcube.admin";
+        public static final String ADMIN        = "jumpcube.admin";
         public static final String DEBUG_NOTIFY = "jumpcube.admin.debug";
     }
 }

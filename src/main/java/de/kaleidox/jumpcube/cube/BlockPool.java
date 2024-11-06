@@ -18,7 +18,7 @@ import java.util.Objects;
 
 import static de.kaleidox.jumpcube.JumpCube.rng;
 
-public class BlockBar implements Generatable {
+public class BlockPool implements Generatable {
     private static Material[] configMaterials = new Material[8];
     private final World world;
     private final @Range(from = 3, to = 3) int[] xyz;
@@ -28,11 +28,11 @@ public class BlockBar implements Generatable {
         return materials[3];
     }
 
-    public BlockBar(Player player) {
+    public BlockPool(Player player) {
         this(player, null);
     }
 
-    public BlockBar(Player player, @Nullable Material[] materials) throws InvalidBlockBarException {
+    public BlockPool(Player player, @Nullable Material[] materials) throws InvalidBlockBarException {
         if (materials != null) this.materials = materials;
         else this.materials = Arrays.copyOf(configMaterials, configMaterials.length);
 
@@ -43,7 +43,7 @@ public class BlockBar implements Generatable {
         validate();
     }
 
-    private BlockBar(World world, int[] xyz) {
+    private BlockPool(World world, int[] xyz) {
         this.world = world;
         this.xyz = xyz;
         this.materials = new Material[8];
@@ -71,7 +71,7 @@ public class BlockBar implements Generatable {
                 .orElse(Material.LIGHT_GRAY_CONCRETE);
     }
 
-    public static BlockBar create(FileConfiguration config, String basePath) {
+    public static BlockPool create(FileConfiguration config, String basePath) {
         World world = Bukkit.getWorld(Objects.requireNonNull(config.getString(basePath + "world"),
                 "No world defined for bar!"));
         int[] xyz = new int[]{
@@ -82,7 +82,7 @@ public class BlockBar implements Generatable {
 
         assert world != null : "Unknown world: " + config.getString(basePath + "world");
 
-        return new BlockBar(world, xyz);
+        return new BlockPool(world, xyz);
     }
 
     @Override
@@ -141,5 +141,6 @@ public class BlockBar implements Generatable {
         public static final int CUBE = 0;
         public static final int WALLS = 1;
         public static final int GALLERY = 2;
+        public static final int PLACEABLE = 3;
     }
 }

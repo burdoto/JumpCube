@@ -1,16 +1,23 @@
+# default settings; apply for all cubes unless configured otherwise
 defaults:
   settings:
     height: 120 # total height
     bottom: -60 # rock bottom y level
     gallery: -20 # gallery y level
+    density: 1.0 # density of blocks in the cube
+    spacing: 0.22 # spacing from the outside walls
   materials:
+    # material pool for the inside of the cube
     cube:
       - red_wool
       - yellow_wool
       - blue_wool
+    # material pool for the walls to the outside world
     walls:
       - red_concrete
       - yellow_concrete
       - blue_concrete
+    # material pool for the gallery
     gallery: light_gray_concrete
+    # material pool for placeable items
     placeable: pumpkin

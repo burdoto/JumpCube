@@ -1,11 +1,18 @@
 package de.kaleidox.jumpcube.cube;
 
+import com.ampznetwork.libmod.api.entity.DbObject;
+import com.ampznetwork.libmod.spigot.converter.WorldConverter;
 import de.kaleidox.jumpcube.JumpCube;
 import de.kaleidox.jumpcube.exception.DuplicateCubeException;
 import de.kaleidox.jumpcube.exception.NoSuchCubeException;
 import de.kaleidox.jumpcube.game.GameManager;
 import de.kaleidox.jumpcube.interfaces.Generatable;
 import de.kaleidox.jumpcube.util.WorldUtil;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import lombok.Singular;
+import lombok.experimental.SuperBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -18,7 +25,13 @@ import org.comroid.api.Startable;
 import org.comroid.cmdr.spigot.SpigotCmdr;
 import org.jetbrains.annotations.Nullable;
 
+import javax.persistence.Convert;
+import javax.persistence.ElementCollection;
+import javax.persistence.Entity;
+import javax.persistence.Table;
+import javax.persistence.Transient;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -26,95 +39,27 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static de.kaleidox.jumpcube.chat.Chat.message;
-import static de.kaleidox.jumpcube.cube.BlockBar.MaterialGroup.*;
+import static de.kaleidox.jumpcube.chat.Chat.*;
+import static de.kaleidox.jumpcube.cube.BlockPool.MaterialGroup.*;
 import static de.kaleidox.jumpcube.util.MathUtil.dist;
 import static de.kaleidox.jumpcube.util.MathUtil.mid;
 import static de.kaleidox.jumpcube.util.WorldUtil.mid;
-import static de.kaleidox.jumpcube.util.WorldUtil.xyz;
-import static java.lang.Math.max;
-import static java.lang.Math.min;
-import static java.lang.System.nanoTime;
+import static de.kaleidox.jumpcube.util.WorldUtil.*;
+import static java.lang.Math.*;
+import static java.lang.System.*;
 import static org.bukkit.Material.*;
 
-public class ExistingCube implements Cube, Generatable, Startable, Initializable {
+@Data
+@Entity
+@SuperBuilder
+@Table(name = "jumpcubes")
+@RequiredArgsConstructor
+@NoArgsConstructor(force = true)
+public class ExistingCube extends DbObject.WithPoiName implements Cube, Generatable, Startable, Initializable {
     private final static Map<String, Cube> instances = new ConcurrentHashMap<>();
-    public final GameManager manager;
-    private final String name;
-    private final World world;
-    private final int[][] pos;
-    private final int minX, maxX, minZ, maxZ;
-    private final BlockBar bar;
-    @Deprecated
-    private final int galleryHeight = 19;
-    private final double density = 0.183; // todo Add changeable density
-    @Deprecated
-    private final int height = 110; // todo Add changeable height
-    private final double spacing = 0.22;
-    private int[][] tpPos;
-    private int tpCycle = -1;
-    private long startNanos = -1;
-
-    @Override
-    public String getCubeName() {
-        return name;
-    }
-
-    @Override
-    public int[][] getPositions() {
-        return pos;
-    }
-
-    @Override
-    public int getGalleryHeight() {
-        int galleryHeight = JumpCube.instance.getConfig().getInt("cubes." + getCubeName() + ".gallery.height", -1);
-        return galleryHeight == -1 ? JumpCube.instance.getConfig().getInt("cube.defaults.gallery.height") : galleryHeight;
-    }
-
-    @Override
-    public int getHeight() {
-        int height = JumpCube.instance.getConfig().getInt("cubes." + getCubeName() + ".height", -1);
-        return height == -1 ? JumpCube.instance.getConfig().getInt("cube.defaults.height") : height;
-    }
-
-    @Override
-    public int getBottom() {
-        int bottom = JumpCube.instance.getConfig().getInt("cubes." + getCubeName() + ".bottom", -1);
-        return bottom == -1 ? JumpCube.instance.getConfig().getInt("cube.defaults.bottom") : bottom;
-    }
-
-    @Override
-    public BlockBar getBlockBar() {
-        return bar;
-    }
-
-    @Override
-    public World getWorld() {
-        return world;
-    }
 
     public static Stream<String> getNames() {
         return instances.values().stream().map(Cube::getCubeName);
-    }
-
-    private ExistingCube(String name, World world, int[][] positions, BlockBar bar) {
-        if (instances.containsKey(name)) throw new DuplicateCubeException(name);
-
-        this.name = name;
-        this.world = world;
-        this.pos = positions;
-        this.bar = bar;
-
-        minX = min(pos[0][0], pos[1][0]);
-        maxX = max(pos[0][0], pos[1][0]);
-        minZ = min(pos[0][2], pos[1][2]);
-        maxZ = max(pos[0][2], pos[1][2]);
-
-        this.manager = new GameManager(this);
-
-        instances.put(name, this);
-
-        initialize();
     }
 
     @Nullable
@@ -151,11 +96,12 @@ public class ExistingCube implements Cube, Generatable, Startable, Initializable
                 });
     }
 
-    public static ExistingCube load(final FileConfiguration config, String name, @Nullable BlockBar bar)
-            throws DuplicateCubeException {
+    @Deprecated
+    public static ExistingCube load(final FileConfiguration config, String name, @Nullable BlockPool bar)
+    throws DuplicateCubeException {
         final String basePath = "cubes." + name + ".";
 
-        if (bar == null) bar = BlockBar.create(config, basePath + "bar.");
+        if (bar == null) bar = BlockPool.create(config, basePath + "bar.");
 
         // get world
         World world = Bukkit.getWorld(Objects.requireNonNull(config.getString(basePath + "world"),
@@ -164,29 +110,102 @@ public class ExistingCube implements Cube, Generatable, Startable, Initializable
         // get positions
         int[][] locs = new int[2][3];
 
-        locs[0][0] = config.getInt(basePath + "pos1.x");
-        locs[0][1] = config.getInt(basePath + "pos1.y");
-        locs[0][2] = config.getInt(basePath + "pos1.z");
+        var x1 = config.getInt(basePath + "pos1.x");
+        var z1 = config.getInt(basePath + "pos1.z");
 
-        locs[1][0] = config.getInt(basePath + "pos2.x");
-        locs[1][1] = config.getInt(basePath + "pos2.y");
-        locs[1][2] = config.getInt(basePath + "pos2.z");
+        var x2 = config.getInt(basePath + "pos2.x");
+        var z2 = config.getInt(basePath + "pos2.z");
 
         assert world != null : "Unknown world: " + config.getString(basePath + "world");
 
-        return new ExistingCube(name, world, locs, bar);
+        return builder().name(name)
+                .world(world)
+                .blockPool(bar)
+                .x1(x1)
+                .z1(z1)
+                .x2(x2)
+                .z2(z2)
+                .minX(min(x1,x2))
+                .maxX(max(z1,z2))
+                .minZ(min(x1,x2))
+                .maxZ(max(z1,z2))
+                .build();
+    }
+
+    public final @Transient GameManager manager = new GameManager(this);
+
+    // attributes
+    private int x1, z1;
+    private int x2, z2;
+    private @Convert(converter = WorldConverter.class) World        world;
+    private @lombok.Builder.Default @Nullable          Double       density            = null;
+    private @lombok.Builder.Default @Nullable          Double       spacing            = null;
+    private @lombok.Builder.Default @Nullable          Integer      height             = null;
+    private @lombok.Builder.Default @Nullable          Integer      bottom             = null;
+    private @lombok.Builder.Default @Nullable          Integer      galleryHeight      = null;
+    private @Singular @ElementCollection @Nullable     List<String> cubeMaterials      = null;
+    private @Singular @ElementCollection @Nullable     List<String> wallMaterials      = null;
+    private @Singular @ElementCollection @Nullable     List<String> galleryMaterials   = null;
+    private @Singular @ElementCollection @Nullable     List<String> placeableMaterials = null;
+
+    // internals
+    private @Transient int[][]   tpPos;
+    private @Transient BlockPool blockPool;
+    private @Transient int       minX, maxX, minZ, maxZ;
+    private @Transient @lombok.Builder.Default int  tpCycle    = -1;
+    private @Transient @lombok.Builder.Default long startNanos = -1;
+
+    @Override
+    public String getCubeName() {
+        return getName();
+    }
+
+    @Override
+    public int[][] getPositions() {
+        return new int[][]{ new int[]{ x1, z1 }, new int[]{ x2, z2 } };
+    }
+
+    public int getGalleryHeight() {
+        return Objects.requireNonNullElseGet(galleryHeight, () -> JumpCube.instance.getConfig().getInt("defaults.settings.gallery"));
+    }
+
+    public int getHeight() {
+        return Objects.requireNonNullElseGet(height, () -> JumpCube.instance.getConfig().getInt("defaults.settings.height"));
+    }
+
+    public int getBottom() {
+        return Objects.requireNonNullElseGet(bottom, () -> JumpCube.instance.getConfig().getInt("defaults.settings.bottom"));
+    }
+
+    @Override
+    public BlockPool getBlockBar() {
+        return blockPool;
+    }
+
+    @Override
+    public World getWorld() {
+        return world;
     }
 
     @Override
     public void delete() {
         assert JumpCube.instance != null;
 
-        // remove from maps
-        instances.remove(name, this);
+        // remove from selections
         JumpCube.instance.selections.forEach((key, value) -> {
             if (value == this)
                 JumpCube.instance.selections.remove(key, value);
         });
+        // delete from db. goodbye!
+        JumpCube.instance.getLib().getEntityService().delete(this);
+    }
+
+    public double getDensity() {
+        return Objects.requireNonNullElseGet(density, () -> JumpCube.instance.getConfig().getDouble("defaults.settings.density")) * 0.1835;
+    }
+
+    public double getSpacing() {
+        return Objects.requireNonNullElseGet(spacing, () -> JumpCube.instance.getConfig().getDouble("defaults.settings.spacing"));
     }
 
     public void teleportIn(Player player) {
@@ -198,10 +217,10 @@ public class ExistingCube implements Cube, Generatable, Startable, Initializable
     public void generateFull() {
         startNanos = nanoTime();
 
-        final int maxY = max(pos[0][1], pos[1][1]);
+        //final int maxY = max(y1, y2);
 
-        final int height = getHeight();
-        final int bottom = getBottom();
+        final int height        = getHeight();
+        final int bottom        = getBottom();
         final int galleryHeight = getGalleryHeight();
 
         int x, y, z;
@@ -211,7 +230,7 @@ public class ExistingCube implements Cube, Generatable, Startable, Initializable
                 for (y = height; y > bottom; y--)
                     world.getBlockAt(x, y, z).setType(AIR);
 
-        for (int off : new int[]{0, 1, 2}) {
+        for (int off : new int[]{ 0, 1, 2 }) {
             final int minXloop = minX + off;
             final int maxXloop = maxX - off;
             final int minZloop = minZ + off;
@@ -221,13 +240,13 @@ public class ExistingCube implements Cube, Generatable, Startable, Initializable
                 for (z = minZloop; z <= maxZloop; z++) {
                     if (x == minXloop || x == maxXloop || z == minZloop || z == maxZloop) {
                         if (off == 0)
-                            for (y = maxY; y > bottom; y--) {
+                            for (y = bottom+height; y > bottom; y--) {
                                 Block block = world.getBlockAt(x, y, z);
                                 if (y < 50 || block.getType() != AIR)
-                                    block.setType(bar.getRandomMaterial(WALLS));
+                                    block.setType(blockPool.getRandomMaterial(WALLS));
                             }
                         else {
-                            world.getBlockAt(x, galleryHeight, z).setType(bar.getRandomMaterial(GALLERY));
+                            world.getBlockAt(x, galleryHeight, z).setType(blockPool.getRandomMaterial(GALLERY));
                             if (off == 1)
                                 world.getBlockAt(x, galleryHeight + 3, z).setType(GLASS);
                         }
@@ -241,10 +260,11 @@ public class ExistingCube implements Cube, Generatable, Startable, Initializable
                 }
         }
 
-        final int spaceX = (int) (Math.abs(pos[1][0] - pos[0][0]) * spacing);
-        final int spaceZ = (int) (Math.abs(pos[1][2] - pos[0][2]) * spacing);
+        var spacing = getSpacing();
+        final int sx = (int) ((maxX - minX) * spacing);
+        final int sz = (int) ((maxZ - minZ) * spacing);
 
-        IntStream.range(2, mid(spaceX, spaceZ))
+        IntStream.range(2, mid(sx, sz))
                 .forEach(off -> {
                     final int minXoff = minX + off;
                     final int maxXoff = maxX - off;
@@ -269,10 +289,12 @@ public class ExistingCube implements Cube, Generatable, Startable, Initializable
     public void generate() {
         if (startNanos == -1) startNanos = nanoTime();
 
-        final int spaceX = (int) (Math.abs(pos[1][0] - pos[0][0]) * spacing);
-        final int spaceZ = (int) (Math.abs(pos[1][2] - pos[0][2]) * spacing);
+        final var spacing = getSpacing();
+        final var density = getDensity();
+        final int spaceX = (int) (Math.abs(maxX-minX) * spacing);
+        final int spaceZ = (int) (Math.abs(maxZ-minZ) * spacing);
 
-        int x, y, z;
+        int       x, y, z;
         final int height = getHeight();
         final int bottom = getBottom();
 
@@ -280,11 +302,11 @@ public class ExistingCube implements Cube, Generatable, Startable, Initializable
             for (z = minZ + spaceZ; z <= maxZ - spaceZ; z++)
                 for (y = bottom + 10; y < height; y++)
                     if (JumpCube.rng.nextDouble() % 1 > density) world.getBlockAt(x, y, z).setType(AIR);
-                    else world.getBlockAt(x, y, z).setType(bar.getRandomMaterial(CUBE));
+                    else world.getBlockAt(x, y, z).setType(blockPool.getRandomMaterial(CUBE));
 
         assert JumpCube.instance != null;
-        JumpCube.instance.getLogger().info("Cube " + name + " was generated, took "
-                + (nanoTime() - startNanos) + " nanoseconds.");
+        JumpCube.instance.getLogger().info("Cube " + getName() + " was generated, took "
+                                           + (nanoTime() - startNanos) + " nanoseconds.");
         startNanos = -1;
 
         start();
@@ -293,8 +315,9 @@ public class ExistingCube implements Cube, Generatable, Startable, Initializable
     @Override
     public void start() {
         System.out.println("gen bridge");
-        final int spaceX = (int) (Math.abs(pos[1][0] - pos[0][0]) * spacing);
-        final int spaceZ = (int) (Math.abs(pos[1][2] - pos[0][2]) * spacing);
+        final var spacing = getSpacing();
+        final int spaceX = (int) (Math.abs(maxX-minX) * spacing);
+        final int spaceZ = (int) (Math.abs(maxZ-minZ) * spacing);
 
         final int midX = mid(minX, maxX);
         final int midZ = mid(minZ, maxZ);
@@ -322,26 +345,31 @@ public class ExistingCube implements Cube, Generatable, Startable, Initializable
 
         int otherX = (mid - Integer.compare(distA, distB));
         (otherX > mid ? IntStream.range(mid, otherX)
-                : (otherX == mid ? IntStream.range(otherX, mid + 1)
-                : IntStream.range(otherX, mid)))
+                      : (otherX == mid ? IntStream.range(otherX, mid + 1)
+                                       : IntStream.range(otherX, mid)))
                 .forEach(xBridge -> IntStream.range(2, space)
                         .flatMap(zOff -> IntStream.of(minZ, maxZ)
                                 .map(z -> z == minZ ? z + zOff : z - zOff))
                         .forEach(zBridge -> world.getBlockAt(xBridge, galleryHeight, zBridge)
-                                .setType(bar.getRandomMaterial(GALLERY))));
+                                .setType(blockPool.getRandomMaterial(GALLERY))));
     }
 
     @Override
     public void initialize() {
+        minX = min(x1, x2);
+        maxX = max(x1, x2);
+        minZ = min(z1, z2);
+        maxZ = max(z1, z2);
+
         manager.initialize();
 
         final int galleryHeight = getGalleryHeight();
 
         this.tpPos = new int[][]{
-                new int[]{minX + 1, galleryHeight + 1, minZ + 1},
-                new int[]{maxX - 1, galleryHeight + 1, maxZ - 1},
-                new int[]{minX + 1, galleryHeight + 1, maxZ - 1},
-                new int[]{maxX - 1, galleryHeight + 1, minZ + 1}
+                new int[]{ minX + 1, galleryHeight + 1, minZ + 1 },
+                new int[]{ maxX - 1, galleryHeight + 1, maxZ - 1 },
+                new int[]{ minX + 1, galleryHeight + 1, maxZ - 1 },
+                new int[]{ maxX - 1, galleryHeight + 1, minZ + 1 }
         };
     }
 

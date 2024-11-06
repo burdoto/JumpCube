@@ -109,7 +109,7 @@ public class JumpCubeCommand {
 
         if (sel == null)
             throw new NoSuchCubeException(BukkitUtil.getPlayer(sender));
-        if (!JumpCube.validateSelection(sender, sel)) return;
+        if (!JumpCube.instance.validateSelection(sender, sel)) return;
         ExistingCube.Commands.regenerate(sender, sel, full);
     }
 
@@ -119,7 +119,7 @@ public class JumpCubeCommand {
         Cube sel = ExistingCube.getSelection(BukkitUtil.getPlayer(sender));
         if (sel == null)
             throw new NoSuchCubeException(BukkitUtil.getPlayer(sender));
-        if (!JumpCube.validateSelection(sender, sel)) return;
+        if (!JumpCube.instance.validateSelection(sender, sel)) return;
         ((ExistingCube) sel).manager.join(sender);
     }
 
@@ -128,7 +128,7 @@ public class JumpCubeCommand {
         Cube sel = ExistingCube.getSelection(BukkitUtil.getPlayer(sender));
         if (sel == null)
             throw new NoSuchCubeException(BukkitUtil.getPlayer(sender));
-        if (!JumpCube.validateSelection(sender, sel)) return;
+        if (!JumpCube.instance.validateSelection(sender, sel)) return;
         ((ExistingCube) sel).manager.leave(sender);
     }
 
@@ -138,7 +138,7 @@ public class JumpCubeCommand {
         Cube sel = ExistingCube.getSelection(BukkitUtil.getPlayer(sender));
         if (sel == null)
             throw new NoSuchCubeException(BukkitUtil.getPlayer(sender));
-        if (!JumpCube.validateSelection(sender, sel)) return;
+        if (!JumpCube.instance.validateSelection(sender, sel)) return;
         ((ExistingCube) sel).manager.start();
     }
 }

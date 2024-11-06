@@ -17,8 +17,8 @@ public class CubeCreationTool implements Cube {
     public final Player player;
     private final World world;
     private String name;
-    private int[][] pos = new int[2][3];
-    private BlockBar bar;
+    private int[][]   pos = new int[2][3];
+    private BlockPool bar;
 
     public boolean isReady() {
         return name != null
@@ -53,7 +53,7 @@ public class CubeCreationTool implements Cube {
     }
 
     @Override
-    public BlockBar getBlockBar() {
+    public BlockPool getBlockBar() {
         return bar;
     }
 
@@ -151,7 +151,7 @@ public class CubeCreationTool implements Cube {
             if (!validateEditability(sender, sel)) return;
 
             Player player = BukkitUtil.getPlayer(sender);
-            ((CubeCreationTool) sel).bar = new BlockBar(player);
+            ((CubeCreationTool) sel).bar = new BlockPool(player);
 
             message(sender, SpigotCmdr.InfoColorizer, "The BlockBar has been pasted relative to you.");
         }
