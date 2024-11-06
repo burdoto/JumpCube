@@ -1,30 +1,35 @@
 package de.kaleidox.jumpcube.cube;
 
 import com.ampznetwork.libmod.api.util.chat.BroadcastType;
-import de.kaleidox.jumpcube.JumpCube;
 import de.kaleidox.jumpcube.util.BukkitUtil;
 import de.kaleidox.jumpcube.util.WorldUtil;
+import lombok.Data;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
 import static de.kaleidox.jumpcube.JumpCube.*;
-import static de.kaleidox.jumpcube.util.WorldUtil.dist;
+import static de.kaleidox.jumpcube.util.WorldUtil.*;
 
+@Data
 public class CubeCreationTool implements Cube {
-    public final Player player;
-    private final World world;
-    private String name;
-    private int[][]   pos = new int[2][3];
-    private BlockPool bar;
+    public final  Player    player;
+    private final World     world;
+    private       String    name;
+    private       int[][]   pos = new int[2][3];
+    private       BlockPool bar;
+
+    public CubeCreationTool(Player player) {
+        this.player = player;
+        this.world  = player.getWorld();
+    }
 
     public boolean isReady() {
         return name != null
-                && pos[0] != null
-                && pos[1] != null
-                && bar != null;
+               && pos[0] != null
+               && pos[1] != null
+               && bar != null;
     }
 
     @Override
@@ -53,26 +58,13 @@ public class CubeCreationTool implements Cube {
     }
 
     @Override
-    public BlockPool getBlockBar() {
+    public BlockPool getBlockPool() {
         return bar;
     }
 
     @Override
     public World getWorld() {
         return world;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public CubeCreationTool(Player player) {
-        this.player = player;
-        this.world = player.getWorld();
-    }
-
-    public void setPos(int y, Location location) {
-        pos[y - 1] = WorldUtil.xyz(location);
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -84,39 +76,21 @@ public class CubeCreationTool implements Cube {
         bar = null;
     }
 
+    public void setPos(int y, Location location) {
+        pos[y - 1] = WorldUtil.xyz(location);
+    }
+
     public ExistingCube create() {
-        assert JumpCube.instance != null;
-
-        final String basePath = "cubes." + name + ".";
-        final FileConfiguration config = JumpCube.instance.getConfig();
-
-        // save world
-        config.set(basePath + "world", world.getName());
-        config.set(basePath + "height", getHeight());
-        config.set(basePath + "bottom", getBottom());
-        config.set(basePath + "gallery.height", getGalleryHeight());
-
-        // save first position
-        config.set(basePath + "pos1.x", pos[0][0]);
-        config.set(basePath + "pos1.y", pos[0][1]);
-        config.set(basePath + "pos1.z", pos[0][2]);
-
-        // save second position
-        config.set(basePath + "pos2.x", pos[1][0]);
-        config.set(basePath + "pos2.y", pos[1][1]);
-        config.set(basePath + "pos2.z", pos[1][2]);
-
-        // save bar
-        bar.save(config, basePath + "bar.");
-
-        // add name to list
-        config.set("cubes.created", (config.isSet("cubes.created")
-                ? (config.getString("cubes.created") + ";")
-                : "") + name);
-
-        JumpCube.instance.saveConfig();
-
-        return ExistingCube.load(config, name, bar);
+        return instance.getLib().getEntityService()
+                .getAccessor(ExistingCube.TYPE)
+                .create().complete(builder -> builder.name(name)
+                        .world(world)
+                        .x1(pos[0][0]).x2(pos[1][0])
+                        .z1(pos[0][2]).z2(pos[1][2])
+                        .cubeMaterials(bar.get(BlockPool.MaterialGroup.CUBE))
+                        .wallMaterials(bar.get(BlockPool.MaterialGroup.WALL))
+                        .galleryMaterials(bar.get(BlockPool.MaterialGroup.GALLERY))
+                        .placeableMaterials(bar.get(BlockPool.MaterialGroup.PLACEABLE)));
     }
 
     public static final class Commands {
@@ -127,11 +101,11 @@ public class CubeCreationTool implements Cube {
             switch (n) {
                 case 1:
                     ((CubeCreationTool) sel).setPos(1, location);
-                    message().target(sender).sendMessage(BroadcastType.INFO, "Position %s was set to your current location!", 1);
+                    message().target(sender).sendMessage(BroadcastType.INFO, "Position {} was set to your current location!", 1);
                     break;
                 case 2:
                     ((CubeCreationTool) sel).setPos(2, location);
-                    message().target(sender).sendMessage(BroadcastType.INFO, "Position %s was set to your current location!", 2);
+                    message().target(sender).sendMessage(BroadcastType.INFO, "Position {} was set to your current location!", 2);
                     break;
             }
 
@@ -140,20 +114,11 @@ public class CubeCreationTool implements Cube {
                 double dist = dist(pos[0], pos[1]);
                 if (dist < 0) dist = dist * -1;
                 if (dist < 32)
-                    message().target(sender).sendMessage(BroadcastType.ERROR, "Size: %s (Cannot be smaller than 32)", (int) dist);
+                    message().target(sender).sendMessage(BroadcastType.ERROR, "Size: {} (Cannot be smaller than 32)", (int) dist);
                 else if (dist > 64)
-                    message().target(sender).sendMessage(BroadcastType.ERROR, "Size: %s (Cannot be larger than 64)", (int) dist);
-                else message().target(sender).sendMessage(BroadcastType.INFO, "Size: %s (Even sizes are recommended)", (int) dist);
+                    message().target(sender).sendMessage(BroadcastType.ERROR, "Size: {} (Cannot be larger than 64)", (int) dist);
+                else message().target(sender).sendMessage(BroadcastType.INFO, "Size: {} (Even sizes are recommended)", (int) dist);
             }
-        }
-
-        public static void bar(CommandSender sender, Cube sel) {
-            if (!validateEditability(sender, sel)) return;
-
-            Player player = BukkitUtil.getPlayer(sender);
-            ((CubeCreationTool) sel).bar = new BlockPool(player);
-
-            message().target(sender).sendMessage(BroadcastType.INFO, "The BlockBar has been pasted relative to you.");
         }
 
         public static void confirm(CommandSender sender, Cube sel) {
@@ -166,17 +131,17 @@ public class CubeCreationTool implements Cube {
 
             int[][] positions = sel.getPositions();
             if (dist(positions[0], positions[1]) < 32) {
-                message().target(sender).sendMessage(BroadcastType.ERROR, "Cube must be at least %s blocks wide!", 32);
+                message().target(sender).sendMessage(BroadcastType.ERROR, "Cube must be at least {} blocks wide!", 32);
                 return;
             } else if (dist(positions[0], positions[1]) > 64) {
-                message().target(sender).sendMessage(BroadcastType.ERROR, "Cube cant be wider than %s blocks!", 64);
+                message().target(sender).sendMessage(BroadcastType.ERROR, "Cube cant be wider than {} blocks!", 64);
                 return;
             }
 
             ExistingCube cube = ((CubeCreationTool) sel).create();
             cube.generateFull();
 
-            message().target(sender).sendMessage(BroadcastType.INFO, "Cube %s was created!", cube.getCubeName());
+            message().target(sender).sendMessage(BroadcastType.INFO, "Cube {} was created!", cube.getCubeName());
         }
 
         private static boolean validateEditability(CommandSender sender, Cube sel) {
@@ -185,7 +150,7 @@ public class CubeCreationTool implements Cube {
                 return false;
             }
             if (!(sel instanceof CubeCreationTool)) {
-                message().target(sender).sendMessage(BroadcastType.ERROR, "Cube %s is not editable!", sel.getCubeName());
+                message().target(sender).sendMessage(BroadcastType.ERROR, "Cube {} is not editable!", sel.getCubeName());
                 return false;
             }
             return true;

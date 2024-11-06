@@ -13,7 +13,7 @@ public interface Cube {
 
     int getBottom();
 
-    BlockPool getBlockBar();
+    BlockPool getBlockPool();
 
     World getWorld();
 

@@ -25,12 +25,12 @@ public class JumpCubeCommand {
 
     @Command
     public static Component version() {
-        return BroadcastType.INFO.colorize("JumpCube version %s", JumpCube.instance.getDescription().getVersion());
+        return BroadcastType.INFO.colorize("JumpCube version {}", JumpCube.instance.getDescription().getVersion());
     }
 
     @Command
     public static Component reload() {
-        return BroadcastType.ERROR.colorize("Sorry, %s not yet implemented", "Reloading");
+        return BroadcastType.ERROR.colorize("Sorry, {} not yet implemented", "Reloading");
     }
 
     @Command
@@ -40,7 +40,7 @@ public class JumpCubeCommand {
         Cube sel        = ExistingCube.getSelection(BukkitUtil.getPlayer(sender));
 
         if (ExistingCube.exists(name)) {
-            message().target(sender).sendMessage(BroadcastType.ERROR, "A cube with the name %s already exists!", name);
+            message().target(sender).sendMessage(BroadcastType.ERROR, "A cube with the name {} already exists!", name);
             return;
         }
 
@@ -53,7 +53,7 @@ public class JumpCubeCommand {
         CubeCreationTool creationTool = new CubeCreationTool(BukkitUtil.getPlayer(sender));
         creationTool.setName(name);
         pl.selections.put(senderUuid, creationTool);
-        message().target(sender).sendMessage(BroadcastType.INFO, "Cube %s creation started!", name);
+        message().target(sender).sendMessage(BroadcastType.INFO, "Cube {} creation started!", name);
     }
 
     @Command
@@ -64,7 +64,7 @@ public class JumpCubeCommand {
         Cube sel        = ExistingCube.getSelection(BukkitUtil.getPlayer(sender));
 
         if (sel != null && sel.getCubeName().equals(name)) {
-            message().target(sender).sendMessage(BroadcastType.INFO, "Cube %s is already selected!", name);
+            message().target(sender).sendMessage(BroadcastType.INFO, "Cube {} is already selected!", name);
             return;
         }
         if (!ExistingCube.exists(name)) throw new NoSuchCubeException(name);
@@ -72,7 +72,7 @@ public class JumpCubeCommand {
         ExistingCube cube = ExistingCube.get(name);
         assert cube != null;
         pl.selections.put(senderUuid, cube);
-        message().target(sender).sendMessage(BroadcastType.INFO, "Cube %s selected!", name);
+        message().target(sender).sendMessage(BroadcastType.INFO, "Cube {} selected!", name);
     }
 
     @Command
@@ -83,16 +83,6 @@ public class JumpCubeCommand {
         if (sel == null)
             throw new NoSuchCubeException(BukkitUtil.getPlayer(sender));
         CubeCreationTool.Commands.pos(sender, sel, n);
-    }
-
-    @Command
-    public static void bar(JumpCube pl, CommandSender sender) {
-        if (!pl.checkPerm(sender, JumpCube.Permission.ADMIN)) return;
-        Cube sel = ExistingCube.getSelection(BukkitUtil.getPlayer(sender));
-
-        if (sel == null)
-            throw new NoSuchCubeException(BukkitUtil.getPlayer(sender));
-        CubeCreationTool.Commands.bar(sender, sel);
     }
 
     @Command

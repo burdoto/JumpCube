@@ -1,7 +1,6 @@
 package de.kaleidox.jumpcube.game.listener;
 
 import com.ampznetwork.libmod.api.util.chat.BroadcastType;
-import de.kaleidox.jumpcube.JumpCube;
 import de.kaleidox.jumpcube.cube.Cube;
 import org.bukkit.World;
 import org.bukkit.event.EventHandler;
@@ -11,6 +10,8 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Arrays;
 
 import static de.kaleidox.jumpcube.JumpCube.*;
 import static de.kaleidox.jumpcube.util.WorldUtil.*;
@@ -25,7 +26,7 @@ public class WorldListener extends ListenerBase implements Listener {
         if (!isInside(event.getBlock().getWorld(), xyz(event.getBlock().getLocation()))) return;
         if (event.isCancelled()) event.setCancelled(false);
 
-        if (event.getBlock().getType() != cube.getBlockBar().getPlaceable()) {
+        if (cube.getBlockPool().getPlaceableMaterials().stream().noneMatch(event.getBlock().getType()::equals)) {
             event.setCancelled(true);
             message().target(event.getPlayer()).sendMessage(BroadcastType.WARNING, "Don't destroy the cube!");
         } else message().target(event.getPlayer()).sendMessage(BroadcastType.HINT, "Here's your joker!");
@@ -36,10 +37,10 @@ public class WorldListener extends ListenerBase implements Listener {
         if (!isInside(event.getBlock().getWorld(), xyz(event.getBlock().getLocation()))) return;
         if (event.isCancelled()) event.setCancelled(false);
 
-        if (event.getBlockPlaced().getType() != cube.getBlockBar().getPlaceable()) {
+        if (cube.getBlockPool().getPlaceableMaterials().stream().noneMatch(event.getBlock().getType()::equals)) {
             event.setCancelled(true);
-            message().target(event.getPlayer()).sendMessage(BroadcastType.WARNING, "You can only place %s!",
-                    cube.getBlockBar().getPlaceable().name().toLowerCase());
+            message().target(event.getPlayer()).sendMessage(BroadcastType.WARNING, "You can only place {}!",
+                    Arrays.toString(cube.getBlockPool().getPlaceableMaterials().toArray()));
         }
     }
 

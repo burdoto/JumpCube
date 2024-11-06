@@ -12,7 +12,10 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 
-import java.util.*;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
@@ -27,6 +30,12 @@ public final class JumpCube extends SubMod$Spigot {
 
     public static BroadcastWrapper message() {
         return instance.broadcast;
+    }
+
+    public BlockPool defaultBlockPool;
+
+    {
+        instance = this;
     }
 
     public JumpCube() {
@@ -60,8 +69,6 @@ public final class JumpCube extends SubMod$Spigot {
         this.broadcast = new BroadcastWrapper(NamedTextColor.AQUA, lib, "JumpCube");
         this.logger    = getLogger();
 
-        BlockPool.initConfig(config);
-
         logger.info("JumpCube loaded!");
     }
 
@@ -76,23 +83,10 @@ public final class JumpCube extends SubMod$Spigot {
     @Override
     public void onEnable() {
         super.onEnable();
-        instance = this;
 
         final FileConfiguration config = getConfig();
+        //this.defaultBlockPool = BlockPool.loadSubPool();
 
-        Optional.ofNullable(config.getString("cubes.created"))
-                .map(str -> str.split(";"))
-                .map(Arrays::asList)
-                .ifPresent(list -> list.forEach(cubeName -> {
-                    try {
-                        ExistingCube.load(config, cubeName, null);
-                        logger.info("Loaded cube: " + cubeName);
-                    } catch (Throwable t) {
-                        logger.throwing(ExistingCube.class.getName(), "load", t);
-                    }
-                }));
-
-        logger.info("JumpCube enabled!");
         logger.info("Please report bugs at https://github.com/burdoto/jumpcube/issues");
     }
 

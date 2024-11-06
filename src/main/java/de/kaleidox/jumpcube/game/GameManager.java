@@ -16,6 +16,7 @@ import org.comroid.api.tree.Initializable;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -57,7 +58,7 @@ public class GameManager implements Initializable {
             // join user
             message().target(sender).sendMessage("Joining cube {}...", cube.getCubeName());
             Player player = BukkitUtil.getPlayer(sender);
-            player.getInventory().remove(cube.getBlockBar().getPlaceable());
+            cube.getBlockPool().getPlaceableMaterials().forEach(player.getInventory()::remove);
             prevLocations.put(player.getUniqueId(), new PrevLoc(player));
             cube.teleportIn(player);
             if (joined.isEmpty())
@@ -69,8 +70,8 @@ public class GameManager implements Initializable {
             // warn user
             message().target(sender).sendMessage(BroadcastType.WARNING,
                     "Warning: You might die in the game! " +
-                    "If you still want to play, use the command again. You will also lose any item of type %s " +
-                    "from your inventory!", cube.getBlockBar().getPlaceable().name());
+                    "If you still want to play, use the command again. You will also lose any item of type {} " +
+                    "from your inventory!", Arrays.toString(cube.getBlockPool().getPlaceableMaterials().toArray()));
 
             attemptedJoin.add(uuid);
         }
@@ -96,7 +97,7 @@ public class GameManager implements Initializable {
             activeGame = false;
 
             if (player != null) {
-                message().sendMessage(BroadcastType.HINT, "%s has reached the goal!", player.getDisplayName());
+                message().sendMessage(BroadcastType.HINT, "{} has reached the goal!", player.getDisplayName());
                 joined.forEach(this::tpOut);
                 joined.clear();
                 leaving.clear();
@@ -157,7 +158,7 @@ public class GameManager implements Initializable {
 
         @Override
         public void run() {
-            message().sendMessage(BroadcastType.INFO, "Time remaining until cube %s will start: %s seconds", cube.getCubeName(), val);
+            message().sendMessage(BroadcastType.INFO, "Time remaining until cube {} will start: {} seconds", cube.getCubeName(), val);
         }
     }
 }
