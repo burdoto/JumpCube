@@ -17,18 +17,18 @@ import static java.util.function.Predicate.*;
 @Builder
 public class BlockPool {
     public static BlockPool load(ConfigurationSection config) {
-        return builder().cubeMaterials(loadSubPool(config.getConfigurationSection("cube"), MaterialGroup.CUBE))
-                .wallMaterials(loadSubPool(config.getConfigurationSection("walls"), MaterialGroup.WALL))
-                .galleryMaterials(loadSubPool(config.getConfigurationSection("gallery"), MaterialGroup.GALLERY))
-                .placeableMaterials(loadSubPool(config.getConfigurationSection("placeable"), MaterialGroup.PLACEABLE))
+        return builder().cubeMaterials(loadSubPool(config, MaterialGroup.CUBE))
+                .wallMaterials(loadSubPool(config, MaterialGroup.WALL))
+                .galleryMaterials(loadSubPool(config, MaterialGroup.GALLERY))
+                .placeableMaterials(loadSubPool(config, MaterialGroup.PLACEABLE))
                 .build();
     }
 
-    public static List<Material> loadSubPool(ConfigurationSection config, MaterialGroup group) {
-        if (config == null) return JumpCube.instance.defaultBlockPool.get(group);
+    public static List<Material> loadSubPool(ConfigurationSection rootConfig, MaterialGroup group) {
+        if (rootConfig == null) return JumpCube.instance.defaultBlockPool.get(group);
         var key = group.name().toLowerCase();
-        if (config.isList(key)) return convertMaterials(config.getStringList(key));
-        if (config.isString(key)) return convertMaterials(List.of(key));
+        if (rootConfig.isList(key)) return convertMaterials(rootConfig.getStringList(key));
+        if (rootConfig.isString(key)) return convertMaterials(List.of(key));
         throw new RuntimeException("Invalid configuration");
     }
 

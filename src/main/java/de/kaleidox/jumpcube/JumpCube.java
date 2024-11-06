@@ -62,24 +62,20 @@ public final class JumpCube extends SubMod$Spigot {
         this.config    = super.getConfig();
         this.broadcast = new BroadcastWrapper(NamedTextColor.AQUA, lib, "JumpCube");
         this.logger    = getLogger();
-
-        logger.info("JumpCube loaded!");
     }
 
     @Override
     public void onDisable() {
         super.onDisable();
         instance = null;
-
-        logger.info("JumpCube disabled!");
     }
 
     @Override
     public void onEnable() {
         super.onEnable();
 
-        final FileConfiguration config = getConfig();
-        //this.defaultBlockPool = BlockPool.loadSubPool();
+        reloadConfig();
+        this.defaultBlockPool = BlockPool.load(config.getConfigurationSection("defaults.materials"));
 
         logger.info("Please report bugs at https://github.com/burdoto/jumpcube/issues");
     }
