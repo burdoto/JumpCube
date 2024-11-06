@@ -33,11 +33,14 @@ public final class JumpCube extends SubMod$Spigot {
     }
 
     public BlockPool defaultBlockPool;
+    public  Map<UUID, Cube>   selections = new ConcurrentHashMap<>();
+    public  BroadcastWrapper  broadcast;
+    private Logger            logger;
+    private FileConfiguration config;
 
     {
         instance = this;
     }
-
     public JumpCube() {
         super(Set.of(Capability.Database), Set.of(ExistingCube.class, GameReview.class));
     }
@@ -53,10 +56,6 @@ public final class JumpCube extends SubMod$Spigot {
         }
         return true;
     }
-    public  Map<UUID, Cube>  selections = new ConcurrentHashMap<>();
-    public  BroadcastWrapper broadcast;
-    private Logger           logger;
-    private FileConfiguration config;
 
     @Override
     public void onLoad() {

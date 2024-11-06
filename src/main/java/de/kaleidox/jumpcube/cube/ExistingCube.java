@@ -23,9 +23,12 @@ import org.comroid.api.Polyfill;
 import org.comroid.api.tree.Initializable;
 import org.jetbrains.annotations.Nullable;
 
+import javax.persistence.CollectionTable;
+import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
 import javax.persistence.PostLoad;
 import javax.persistence.PostUpdate;
 import javax.persistence.Table;
@@ -97,16 +100,24 @@ public class ExistingCube extends DbObject.WithPoiName implements Cube, Generata
     // attributes
     private int x1, z1;
     private int x2, z2;
-    private @Convert(converter = WorldConverter.class)                                           World          world;
-    private @lombok.Builder.Default @Nullable                                                    Double         density            = null;
-    private @lombok.Builder.Default @Nullable                                                    Double         spacing            = null;
-    private @lombok.Builder.Default @Nullable                                                    Integer        height             = null;
-    private @lombok.Builder.Default @Nullable                                                    Integer        bottom             = null;
-    private @lombok.Builder.Default @Nullable                                                    Integer        galleryHeight      = null;
-    private @Singular @ElementCollection @Nullable @Convert(converter = MaterialConverter.class) List<Material> cubeMaterials      = null;
-    private @Singular @ElementCollection @Nullable @Convert(converter = MaterialConverter.class) List<Material> wallMaterials      = null;
-    private @Singular @ElementCollection @Nullable @Convert(converter = MaterialConverter.class) List<Material> galleryMaterials   = null;
-    private @Singular @ElementCollection @Nullable @Convert(converter = MaterialConverter.class) List<Material> placeableMaterials = null;
+    private @Convert(converter = WorldConverter.class) World          world;
+    private @lombok.Builder.Default @Nullable          Double         density            = null;
+    private @lombok.Builder.Default @Nullable          Double         spacing            = null;
+    private @lombok.Builder.Default @Nullable          Integer        height             = null;
+    private @lombok.Builder.Default @Nullable          Integer        bottom             = null;
+    private @lombok.Builder.Default @Nullable          Integer        galleryHeight      = null;
+    @Convert(converter = MaterialConverter.class) @Column(name = "material")
+    @CollectionTable(name = "jumpcube_materials_cube", joinColumns = @JoinColumn(name = "id"))
+    private @Singular @ElementCollection @Nullable     List<Material> cubeMaterials      = null;
+    @Convert(converter = MaterialConverter.class) @Column(name = "material")
+    @CollectionTable(name = "jumpcube_materials_wall", joinColumns = @JoinColumn(name = "id"))
+    private @Singular @ElementCollection @Nullable     List<Material> wallMaterials      = null;
+    @Convert(converter = MaterialConverter.class) @Column(name = "material")
+    @CollectionTable(name = "jumpcube_materials_gallery", joinColumns = @JoinColumn(name = "id"))
+    private @Singular @ElementCollection @Nullable     List<Material> galleryMaterials   = null;
+    @Convert(converter = MaterialConverter.class) @Column(name = "material")
+    @CollectionTable(name = "jumpcube_materials_placeable", joinColumns = @JoinColumn(name = "id"))
+    private @Singular @ElementCollection @Nullable     List<Material> placeableMaterials = null;
 
     // internals
     private @Transient                         int[][]   tpPos;
