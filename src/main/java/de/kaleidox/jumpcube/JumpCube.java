@@ -7,9 +7,9 @@ import de.kaleidox.jumpcube.cmd.JumpCubeCommand;
 import de.kaleidox.jumpcube.cube.BlockPool;
 import de.kaleidox.jumpcube.cube.Cube;
 import de.kaleidox.jumpcube.cube.ExistingCube;
+import de.kaleidox.jumpcube.game.GameReview;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -25,7 +25,7 @@ public final class JumpCube extends SubMod$Spigot {
     }
 
     public JumpCube() {
-        super(Set.of(Capability.Database), Set.of(ExistingCube.class/*, GameReview.class*/));
+        super(Set.of(Capability.Database), Set.of(ExistingCube.class, GameReview.class));
     }
 
     public boolean validateSelection(CommandSender sender, Cube sel) {
