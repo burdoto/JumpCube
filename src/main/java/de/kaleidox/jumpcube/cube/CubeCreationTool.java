@@ -18,7 +18,6 @@ public class CubeCreationTool implements Cube {
     private final World     world;
     private       String    name;
     private       int[][]   pos = new int[2][3];
-    private       BlockPool bar;
 
     public CubeCreationTool(Player player) {
         this.player = player;
@@ -28,8 +27,7 @@ public class CubeCreationTool implements Cube {
     public boolean isReady() {
         return name != null
                && pos[0] != null
-               && pos[1] != null
-               && bar != null;
+               && pos[1] != null;
     }
 
     @Override
@@ -59,7 +57,7 @@ public class CubeCreationTool implements Cube {
 
     @Override
     public BlockPool getBlockPool() {
-        return bar;
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -73,7 +71,6 @@ public class CubeCreationTool implements Cube {
         // release pointers
         name = null;
         pos = null;
-        bar = null;
     }
 
     public void setPos(int y, Location location) {
@@ -86,11 +83,7 @@ public class CubeCreationTool implements Cube {
                 .create().complete(builder -> builder.name(name)
                         .world(world)
                         .x1(pos[0][0]).x2(pos[1][0])
-                        .z1(pos[0][2]).z2(pos[1][2])
-                        .cubeMaterials(bar.get(BlockPool.MaterialGroup.CUBE))
-                        .wallMaterials(bar.get(BlockPool.MaterialGroup.WALL))
-                        .galleryMaterials(bar.get(BlockPool.MaterialGroup.GALLERY))
-                        .placeableMaterials(bar.get(BlockPool.MaterialGroup.PLACEABLE)));
+                        .z1(pos[0][2]).z2(pos[1][2]));
     }
 
     public static final class Commands {

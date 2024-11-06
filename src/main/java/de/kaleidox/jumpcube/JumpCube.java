@@ -3,7 +3,7 @@ package de.kaleidox.jumpcube;
 import com.ampznetwork.libmod.api.util.chat.BroadcastType;
 import com.ampznetwork.libmod.api.util.chat.BroadcastWrapper;
 import com.ampznetwork.libmod.spigot.SubMod$Spigot;
-import de.kaleidox.jumpcube.cmd.JumpCubeCommand;
+import de.kaleidox.jumpcube.cmd.JumpCubeCommands;
 import de.kaleidox.jumpcube.cube.BlockPool;
 import de.kaleidox.jumpcube.cube.Cube;
 import de.kaleidox.jumpcube.cube.ExistingCube;
@@ -59,7 +59,7 @@ public final class JumpCube extends SubMod$Spigot {
 
     @Override
     public void onLoad() {
-        cmdr.register(JumpCubeCommand.class);
+        cmdr.register(JumpCubeCommands.class);
         cmdr.register(this);
 
         super.onLoad();
