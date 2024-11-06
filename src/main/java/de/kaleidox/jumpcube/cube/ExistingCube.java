@@ -11,7 +11,6 @@ import de.kaleidox.jumpcube.interfaces.Generatable;
 import de.kaleidox.jumpcube.util.WorldUtil;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import lombok.Singular;
 import lombok.experimental.SuperBuilder;
 import org.bukkit.Location;
@@ -53,9 +52,8 @@ import static org.bukkit.Material.*;
 @Data
 @Entity
 @SuperBuilder
+@NoArgsConstructor
 @Table(name = "jumpcubes")
-@RequiredArgsConstructor
-@NoArgsConstructor(force = true)
 public class ExistingCube extends DbObject.WithPoiName implements Cube, Generatable, Initializable {
     private final static Map<String, Cube>                                               instances = new ConcurrentHashMap<>();
     public static final  EntityType<ExistingCube, ExistingCube.Builder<ExistingCube, ?>> TYPE      = Polyfill.uncheckedCast(new EntityType<>(ExistingCube::builder,
