@@ -1,5 +1,7 @@
 package de.kaleidox.jumpcube.game.listener;
 
+import com.ampznetwork.libmod.api.util.chat.BroadcastType;
+import de.kaleidox.jumpcube.JumpCube;
 import de.kaleidox.jumpcube.cube.Cube;
 import org.bukkit.World;
 import org.bukkit.event.EventHandler;
@@ -8,10 +10,9 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.comroid.cmdr.spigot.SpigotCmdr;
 import org.jetbrains.annotations.NotNull;
 
-import static de.kaleidox.jumpcube.chat.Chat.message;
+import static de.kaleidox.jumpcube.JumpCube.*;
 import static de.kaleidox.jumpcube.util.WorldUtil.*;
 
 public class WorldListener extends ListenerBase implements Listener {
@@ -26,8 +27,8 @@ public class WorldListener extends ListenerBase implements Listener {
 
         if (event.getBlock().getType() != cube.getBlockBar().getPlaceable()) {
             event.setCancelled(true);
-            message(event.getPlayer(), SpigotCmdr.WarnColorizer, "Don't destroy the cube!");
-        } else message(event.getPlayer(), SpigotCmdr.HintColorizer, "Here's your joker!");
+            message().target(event.getPlayer()).sendMessage(BroadcastType.WARNING, "Don't destroy the cube!");
+        } else message().target(event.getPlayer()).sendMessage(BroadcastType.HINT, "Here's your joker!");
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -37,7 +38,7 @@ public class WorldListener extends ListenerBase implements Listener {
 
         if (event.getBlockPlaced().getType() != cube.getBlockBar().getPlaceable()) {
             event.setCancelled(true);
-            message(event.getPlayer(), SpigotCmdr.WarnColorizer, "You can only place %s!",
+            message().target(event.getPlayer()).sendMessage(BroadcastType.WARNING, "You can only place %s!",
                     cube.getBlockBar().getPlaceable().name().toLowerCase());
         }
     }

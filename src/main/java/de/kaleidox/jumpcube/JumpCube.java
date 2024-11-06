@@ -8,6 +8,7 @@ import de.kaleidox.jumpcube.cube.BlockPool;
 import de.kaleidox.jumpcube.cube.Cube;
 import de.kaleidox.jumpcube.cube.ExistingCube;
 import de.kaleidox.jumpcube.game.GameReview;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 
@@ -22,6 +23,10 @@ public final class JumpCube extends SubMod$Spigot {
 
     public static Stream<String> getCubeNames() {
         return ExistingCube.getNames();
+    }
+
+    public static BroadcastWrapper message() {
+        return instance.broadcast;
     }
 
     public JumpCube() {
@@ -52,7 +57,7 @@ public final class JumpCube extends SubMod$Spigot {
         super.onLoad();
 
         this.config    = super.getConfig();
-        this.broadcast = new BroadcastWrapper(lib, "JumpCube");
+        this.broadcast = new BroadcastWrapper(NamedTextColor.AQUA, lib, "JumpCube");
         this.logger    = getLogger();
 
         BlockPool.initConfig(config);

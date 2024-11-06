@@ -1,7 +1,6 @@
 package de.kaleidox.jumpcube.cube;
 
-import de.kaleidox.jumpcube.exception.InvalidBlockBarException;
-import de.kaleidox.jumpcube.interfaces.Generatable;
+import de.kaleidox.jumpcube.exception.InvalidBlockPoolException;
 import de.kaleidox.jumpcube.util.BukkitUtil;
 import de.kaleidox.jumpcube.util.WorldUtil;
 import org.bukkit.Bukkit;
@@ -16,40 +15,10 @@ import org.jetbrains.annotations.Range;
 import java.util.Arrays;
 import java.util.Objects;
 
-import static de.kaleidox.jumpcube.JumpCube.rng;
+import static de.kaleidox.jumpcube.JumpCube.*;
 
-public class BlockPool implements Generatable {
-    private static Material[] configMaterials = new Material[8];
-    private final World world;
-    private final @Range(from = 3, to = 3) int[] xyz;
-    private final Material[] materials;
-
-    public Material getPlaceable() {
-        return materials[3];
-    }
-
-    public BlockPool(Player player) {
-        this(player, null);
-    }
-
-    public BlockPool(Player player, @Nullable Material[] materials) throws InvalidBlockBarException {
-        if (materials != null) this.materials = materials;
-        else this.materials = Arrays.copyOf(configMaterials, configMaterials.length);
-
-        this.world = player.getWorld();
-        this.xyz = WorldUtil.xyz(player.getLocation());
-
-        generate();
-        validate();
-    }
-
-    private BlockPool(World world, int[] xyz) {
-        this.world = world;
-        this.xyz = xyz;
-        this.materials = new Material[8];
-
-        refresh();
-    }
+public class BlockPool {
+    private static                         Material[] configMaterials = new Material[8];
 
     public static void initConfig(FileConfiguration config) {
         /* todo fixme */
@@ -84,14 +53,34 @@ public class BlockPool implements Generatable {
 
         return new BlockPool(world, xyz);
     }
+    private final                          World      world;
+    private final @Range(from = 3, to = 3) int[]      xyz;
+    private final                          Material[] materials;
 
-    @Override
-    public void generate() {
-        final int[] c = {0};
+    public BlockPool(Player player) {
+        this(player, null);
+    }
 
-        for (int addY : new int[]{1, 0})
-            for (int addX : new int[]{1, 2, 3, 4})
-                world.getBlockAt(xyz[0] + addX, xyz[1] + addY, xyz[2]).setType(materials[c[0]++]);
+    public BlockPool(Player player, @Nullable Material[] materials) throws InvalidBlockPoolException {
+        if (materials != null) this.materials = materials;
+        else this.materials = Arrays.copyOf(configMaterials, configMaterials.length);
+
+        this.world = player.getWorld();
+        this.xyz   = WorldUtil.xyz(player.getLocation());
+
+        validate();
+    }
+
+    private BlockPool(World world, int[] xyz) {
+        this.world     = world;
+        this.xyz       = xyz;
+        this.materials = new Material[8];
+
+        refresh();
+    }
+
+    public Material getPlaceable() {
+        return materials[3];
     }
 
     public Material getRandomMaterial(@MagicConstant(valuesFromClass = MaterialGroup.class) int group) {
@@ -108,22 +97,22 @@ public class BlockPool implements Generatable {
         return Material.LIGHT_GRAY_WOOL;
     }
 
-    public void validate() throws InvalidBlockBarException {
+    public void validate() throws InvalidBlockPoolException {
         refresh();
 
         for (int i = 0; i < materials.length; i++) {
             if (!materials[i].isSolid())
-                throw new InvalidBlockBarException(materials[i], InvalidBlockBarException.Cause.NON_SOLID);
+                throw new InvalidBlockPoolException(materials[i], InvalidBlockPoolException.Cause.NON_SOLID);
             if (i != 3 && materials[i].isInteractable())
-                throw new InvalidBlockBarException(materials[i], InvalidBlockBarException.Cause.INTERACTABLE);
+                throw new InvalidBlockPoolException(materials[i], InvalidBlockPoolException.Cause.INTERACTABLE);
         }
     }
 
     public void refresh() {
-        final int[] c = {0};
+        final int[] c = { 0 };
 
-        for (int addY : new int[]{1, 0})
-            for (int addX : new int[]{1, 2, 3, 4})
+        for (int addY : new int[]{ 1, 0 })
+            for (int addX : new int[]{ 1, 2, 3, 4 })
                 materials[c[0]++] = world.getBlockAt(xyz[0] + addX, xyz[1] + addY, xyz[2]).getType();
     }
 
@@ -138,9 +127,9 @@ public class BlockPool implements Generatable {
     }
 
     public final static class MaterialGroup {
-        public static final int CUBE = 0;
-        public static final int WALLS = 1;
-        public static final int GALLERY = 2;
+        public static final int CUBE      = 0;
+        public static final int WALLS     = 1;
+        public static final int GALLERY   = 2;
         public static final int PLACEABLE = 3;
     }
 }

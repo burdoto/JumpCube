@@ -39,9 +39,6 @@ dependencies {
     if (findProject(':japi') != null)
         implementation project(':japi')
     else implementation 'org.comroid:api:1.+'
-    if (findProject(':cmdr-spigot') != null)
-        implementation project(':cmdr-spigot')
-    else implementation 'org.comroid:cmdr-spigot:0.+'
 
     implementation project(':LibMod:spigot')
 

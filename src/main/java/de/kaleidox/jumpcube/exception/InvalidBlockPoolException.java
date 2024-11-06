@@ -1,10 +1,10 @@
 package de.kaleidox.jumpcube.exception;
 
 import org.bukkit.Material;
-import org.comroid.cmdr.spigot.InnerCommandException;
+import org.comroid.api.func.util.Command;
 
-public final class InvalidBlockBarException extends InnerCommandException {
-    public InvalidBlockBarException(Material errorMaterial, Cause cause) {
+public final class InvalidBlockPoolException extends Command.Error {
+    public InvalidBlockPoolException(Material errorMaterial, Cause cause) {
         super("Invalid block: " + errorMaterial.name() + " is not a valid block; it is " + cause.s);
     }
 

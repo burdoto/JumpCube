@@ -1,42 +1,46 @@
 package de.kaleidox.jumpcube.cmd;
 
+import com.ampznetwork.libmod.api.util.chat.BroadcastType;
 import de.kaleidox.jumpcube.JumpCube;
+import de.kaleidox.jumpcube.cmd.autofill.CubeNameProvider;
 import de.kaleidox.jumpcube.cube.Cube;
 import de.kaleidox.jumpcube.cube.CubeCreationTool;
 import de.kaleidox.jumpcube.cube.ExistingCube;
 import de.kaleidox.jumpcube.exception.NoSuchCubeException;
 import de.kaleidox.jumpcube.util.BukkitUtil;
+import net.kyori.adventure.text.Component;
 import org.bukkit.command.CommandSender;
-import org.comroid.cmdr.model.Command;
+import org.comroid.annotations.Alias;
+import org.comroid.api.func.util.Command;
 
 import java.util.UUID;
 
-import static de.kaleidox.jumpcube.chat.Chat.message;
-import static org.comroid.cmdr.spigot.SpigotCmdr.ErrorColorizer;
-import static org.comroid.cmdr.spigot.SpigotCmdr.InfoColorizer;
+import static de.kaleidox.jumpcube.JumpCube.*;
 
-@Command(name = "jumpcube")
-@Command.Alias("jc")
-@Command.Default("version")
+@Command(value = "jumpcube")
+@Alias("jc")
 public class JumpCubeCommand {
     @Command
-    public static String version() {
-        return InfoColorizer.makeMessage("JumpCube version %s", JumpCube.instance.getDescription().getVersion());
+    public static Component $() {return version();}
+
+    @Command
+    public static Component version() {
+        return BroadcastType.INFO.colorize("JumpCube version %s", JumpCube.instance.getDescription().getVersion());
     }
 
     @Command
-    public static String reload() {
-        return ErrorColorizer.makeMessage("Sorry, %s not yet implemented", "Reloading");
+    public static Component reload() {
+        return BroadcastType.ERROR.colorize("Sorry, %s not yet implemented", "Reloading");
     }
 
     @Command
     public static void create(JumpCube pl, CommandSender sender, @Command.Arg String name) {
         if (!pl.checkPerm(sender, JumpCube.Permission.ADMIN)) return;
         UUID senderUuid = BukkitUtil.getUuid(sender);
-        Cube sel = ExistingCube.getSelection(BukkitUtil.getPlayer(sender));
+        Cube sel        = ExistingCube.getSelection(BukkitUtil.getPlayer(sender));
 
         if (ExistingCube.exists(name)) {
-            message(sender, ErrorColorizer, "A cube with the name %s already exists!", name);
+            message().target(sender).sendMessage(BroadcastType.ERROR, "A cube with the name %s already exists!", name);
             return;
         }
 
@@ -49,18 +53,18 @@ public class JumpCubeCommand {
         CubeCreationTool creationTool = new CubeCreationTool(BukkitUtil.getPlayer(sender));
         creationTool.setName(name);
         pl.selections.put(senderUuid, creationTool);
-        message(sender, InfoColorizer, "Cube %s creation started!", name);
+        message().target(sender).sendMessage(BroadcastType.INFO, "Cube %s creation started!", name);
     }
 
     @Command
-    @Command.Alias("sel")
-    public static void select(JumpCube pl, CommandSender sender, @Command.Arg(autoComplete = "°getCubeNames") String name) {
+    @Alias("sel")
+    public static void select(JumpCube pl, CommandSender sender, @Command.Arg(autoFillProvider = CubeNameProvider.class) String name) {
         if (!pl.checkPerm(sender, JumpCube.Permission.USER)) return;
         UUID senderUuid = BukkitUtil.getUuid(sender);
-        Cube sel = ExistingCube.getSelection(BukkitUtil.getPlayer(sender));
+        Cube sel        = ExistingCube.getSelection(BukkitUtil.getPlayer(sender));
 
         if (sel != null && sel.getCubeName().equals(name)) {
-            message(sender, InfoColorizer, "Cube %s is already selected!", name);
+            message().target(sender).sendMessage(BroadcastType.INFO, "Cube %s is already selected!", name);
             return;
         }
         if (!ExistingCube.exists(name)) throw new NoSuchCubeException(name);
@@ -68,11 +72,11 @@ public class JumpCubeCommand {
         ExistingCube cube = ExistingCube.get(name);
         assert cube != null;
         pl.selections.put(senderUuid, cube);
-        message(sender, InfoColorizer, "Cube %s selected!", name);
+        message().target(sender).sendMessage(BroadcastType.INFO, "Cube %s selected!", name);
     }
 
     @Command
-    public static void pos(JumpCube pl, CommandSender sender, @Command.Arg(autoComplete = {"1", "2"}) int n) {
+    public static void pos(JumpCube pl, CommandSender sender, @Command.Arg(autoFill = { "1", "2" }) int n) {
         if (!pl.checkPerm(sender, JumpCube.Permission.ADMIN)) return;
         Cube sel = ExistingCube.getSelection(BukkitUtil.getPlayer(sender));
 
@@ -102,8 +106,8 @@ public class JumpCubeCommand {
     }
 
     @Command
-    @Command.Alias("regen")
-    public static void regenerate(JumpCube pl, CommandSender sender, @Command.Arg(required = false, autoComplete = {"true", "false"}) boolean full) {
+    @Alias("regen")
+    public static void regenerate(JumpCube pl, CommandSender sender, @Command.Arg(required = false, autoFill = { "true", "false" }) boolean full) {
         if (!pl.checkPerm(sender, JumpCube.Permission.REGENERATE)) return;
         Cube sel = ExistingCube.getSelection(BukkitUtil.getPlayer(sender));
 

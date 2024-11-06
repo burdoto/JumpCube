@@ -1,11 +1,13 @@
 package de.kaleidox.jumpcube.cube;
 
 import com.ampznetwork.libmod.api.entity.DbObject;
+import com.ampznetwork.libmod.api.model.EntityType;
 import com.ampznetwork.libmod.spigot.converter.WorldConverter;
 import de.kaleidox.jumpcube.JumpCube;
 import de.kaleidox.jumpcube.exception.DuplicateCubeException;
 import de.kaleidox.jumpcube.exception.NoSuchCubeException;
 import de.kaleidox.jumpcube.game.GameManager;
+import de.kaleidox.jumpcube.game.GameReview;
 import de.kaleidox.jumpcube.interfaces.Generatable;
 import de.kaleidox.jumpcube.util.WorldUtil;
 import lombok.Data;
@@ -20,9 +22,8 @@ import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
-import org.comroid.api.Initializable;
-import org.comroid.api.Startable;
-import org.comroid.cmdr.spigot.SpigotCmdr;
+import org.comroid.api.Polyfill;
+import org.comroid.api.tree.Initializable;
 import org.jetbrains.annotations.Nullable;
 
 import javax.persistence.Convert;
@@ -39,7 +40,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static de.kaleidox.jumpcube.chat.Chat.*;
+import static de.kaleidox.jumpcube.JumpCube.*;
 import static de.kaleidox.jumpcube.cube.BlockPool.MaterialGroup.*;
 import static de.kaleidox.jumpcube.util.MathUtil.dist;
 import static de.kaleidox.jumpcube.util.MathUtil.mid;
@@ -55,8 +56,10 @@ import static org.bukkit.Material.*;
 @Table(name = "jumpcubes")
 @RequiredArgsConstructor
 @NoArgsConstructor(force = true)
-public class ExistingCube extends DbObject.WithPoiName implements Cube, Generatable, Startable, Initializable {
-    private final static Map<String, Cube> instances = new ConcurrentHashMap<>();
+public class ExistingCube extends DbObject.WithPoiName implements Cube, Generatable, Initializable {
+    public static final  EntityType<ExistingCube, ExistingCube.Builder<ExistingCube, ?>> TYPE
+            = Polyfill.uncheckedCast(new EntityType<>(ExistingCube::builder, null, ExistingCube.class, ExistingCube.Builder.class));
+    private final static Map<String, Cube>                                         instances = new ConcurrentHashMap<>();
 
     public static Stream<String> getNames() {
         return instances.values().stream().map(Cube::getCubeName);
@@ -71,7 +74,7 @@ public class ExistingCube extends DbObject.WithPoiName implements Cube, Generata
         return instances.containsKey(name);
     }
 
-    public static Cube getSelection(Player player) throws NoSuchCubeException {
+    public static Cube getSelection(Player player) {
         assert JumpCube.instance != null;
 
         return Optional.ofNullable(JumpCube.instance.selections.get(player.getUniqueId()))
@@ -91,14 +94,13 @@ public class ExistingCube extends DbObject.WithPoiName implements Cube, Generata
                                 )))
                                 .orElseThrow(() -> new NoSuchCubeException(player));
                     JumpCube.instance.selections.put(player.getUniqueId(), sel);
-                    message(player, SpigotCmdr.InfoColorizer, "Cube %s was automatically selected!", sel.getCubeName());
+                    message().target(player).sendMessage("Cube {} was automatically selected!", sel.getCubeName());
                     return sel;
                 });
     }
 
     @Deprecated
-    public static ExistingCube load(final FileConfiguration config, String name, @Nullable BlockPool bar)
-    throws DuplicateCubeException {
+    public static ExistingCube load(final FileConfiguration config, String name, @Nullable BlockPool bar) {
         final String basePath = "cubes." + name + ".";
 
         if (bar == null) bar = BlockPool.create(config, basePath + "bar.");
@@ -312,7 +314,6 @@ public class ExistingCube extends DbObject.WithPoiName implements Cube, Generata
         start();
     }
 
-    @Override
     public void start() {
         System.out.println("gen bridge");
         final var spacing = getSpacing();
@@ -379,7 +380,7 @@ public class ExistingCube extends DbObject.WithPoiName implements Cube, Generata
             if (full) ((ExistingCube) sel).generateFull();
             else ((ExistingCube) sel).generate();
 
-            message(sender, SpigotCmdr.InfoColorizer, "Cube was regenerated!");
+            message().target(sender).sendMessage("Cube was regenerated!");
         }
     }
 }

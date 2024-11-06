@@ -1,7 +1,7 @@
 package de.kaleidox.jumpcube.game;
 
+import com.ampznetwork.libmod.api.util.chat.BroadcastType;
 import de.kaleidox.jumpcube.JumpCube;
-import de.kaleidox.jumpcube.chat.Chat;
 import de.kaleidox.jumpcube.cube.ExistingCube;
 import de.kaleidox.jumpcube.exception.GameRunningException;
 import de.kaleidox.jumpcube.game.listener.PlayerListener;
@@ -12,9 +12,7 @@ import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
-import org.comroid.api.Initializable;
-import org.comroid.api.Startable;
-import org.comroid.cmdr.spigot.SpigotCmdr;
+import org.comroid.api.tree.Initializable;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -28,25 +26,23 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.IntStream;
 
-import static de.kaleidox.jumpcube.JumpCube.Permission.DEBUG_NOTIFY;
-import static de.kaleidox.jumpcube.chat.Chat.broadcast;
-import static de.kaleidox.jumpcube.chat.Chat.message;
-import static de.kaleidox.jumpcube.util.WorldUtil.location;
-import static de.kaleidox.jumpcube.util.WorldUtil.xyz;
-import static java.util.concurrent.TimeUnit.SECONDS;
+import static de.kaleidox.jumpcube.JumpCube.Permission.*;
+import static de.kaleidox.jumpcube.JumpCube.*;
+import static de.kaleidox.jumpcube.util.WorldUtil.*;
+import static java.util.concurrent.TimeUnit.*;
 
-public class GameManager implements Startable, Initializable {
-    public final List<UUID> leaving = new ArrayList<>();
-    public final List<Player> joined = new ArrayList<>();
-    private final Map<UUID, PrevLoc> prevLocations = new ConcurrentHashMap<>();
-    private final ExistingCube cube;
-    private final List<UUID> attemptedJoin = new ArrayList<>();
-    private final int baseTime = 30;
-    public boolean activeGame = false;
-    private int remaining = 30;
+public class GameManager implements Initializable {
+    public final  List<UUID>                          leaving       = new ArrayList<>();
+    public final  List<Player>                        joined        = new ArrayList<>();
+    private final Map<UUID, PrevLoc>                  prevLocations = new ConcurrentHashMap<>();
+    private final ExistingCube                        cube;
+    private final List<UUID>                          attemptedJoin = new ArrayList<>();
+    private final int                                 baseTime      = 30;
+    public        boolean                             activeGame    = false;
+    private       int                                 remaining     = 30;
     @Nullable
-    private ScheduledExecutorService scheduler;
-    private AtomicReference<ScheduledFuture<?>> timeBroadcastFuture;
+    private       ScheduledExecutorService            scheduler;
+    private       AtomicReference<ScheduledFuture<?>> timeBroadcastFuture;
 
     public GameManager(ExistingCube cube) {
         this.cube = cube;
@@ -59,18 +55,20 @@ public class GameManager implements Startable, Initializable {
 
         if (attemptedJoin.removeIf(id -> id.equals(uuid))) {
             // join user
-            message(sender, SpigotCmdr.InfoColorizer, "Joining cube %s...", cube.getCubeName());
+            message().target(sender).sendMessage("Joining cube {}...", cube.getCubeName());
             Player player = BukkitUtil.getPlayer(sender);
             player.getInventory().remove(cube.getBlockBar().getPlaceable());
             prevLocations.put(player.getUniqueId(), new PrevLoc(player));
             cube.teleportIn(player);
+            if (joined.isEmpty())
+                message().target(DEBUG_NOTIFY).sendMessage("Generating cube...");
             joined.add(player);
             if (scheduler == null) startTimer();
-            Chat.broadcast(DEBUG_NOTIFY, SpigotCmdr.InfoColorizer, "Generating cube...");
             if (joined.size() == 1) cube.generate();
         } else {
             // warn user
-            message(sender, SpigotCmdr.WarnColorizer, "Warning: You might die in the game! " +
+            message().target(sender).sendMessage(BroadcastType.WARNING,
+                    "Warning: You might die in the game! " +
                     "If you still want to play, use the command again. You will also lose any item of type %s " +
                     "from your inventory!", cube.getBlockBar().getPlaceable().name());
 
@@ -78,7 +76,6 @@ public class GameManager implements Startable, Initializable {
         }
     }
 
-    @Override
     public void start() {
         activeGame = true;
         //cube.start();
@@ -95,20 +92,20 @@ public class GameManager implements Startable, Initializable {
 
     public void conclude(@Nullable Player player) {
         if (activeGame) {
-            scheduler = null;
+            scheduler  = null;
             activeGame = false;
 
             if (player != null) {
-                broadcast(SpigotCmdr.HintColorizer, "%s has reached the goal!", player.getDisplayName());
+                message().sendMessage(BroadcastType.HINT, "%s has reached the goal!", player.getDisplayName());
                 joined.forEach(this::tpOut);
                 joined.clear();
                 leaving.clear();
-            } else broadcast(SpigotCmdr.HintColorizer, "All players left the cube. The game has ended.");
+            } else message().sendMessage(BroadcastType.HINT, "All players left the cube. The game has ended.");
         }
     }
 
     public void leave(CommandSender sender) {
-        UUID uuid = BukkitUtil.getUuid(sender);
+        UUID   uuid   = BukkitUtil.getUuid(sender);
         Player player = BukkitUtil.getPlayer(sender);
 
         tpOut(player);
@@ -146,7 +143,7 @@ public class GameManager implements Startable, Initializable {
         private final int[] location;
 
         private PrevLoc(Player player) {
-            this.world = player.getWorld();
+            this.world    = player.getWorld();
             this.location = xyz(player.getLocation());
         }
     }
@@ -160,7 +157,7 @@ public class GameManager implements Startable, Initializable {
 
         @Override
         public void run() {
-            broadcast(SpigotCmdr.InfoColorizer, "Time remaining until cube %s will start: %s seconds", cube.getCubeName(), val);
+            message().sendMessage(BroadcastType.INFO, "Time remaining until cube %s will start: %s seconds", cube.getCubeName(), val);
         }
     }
 }
